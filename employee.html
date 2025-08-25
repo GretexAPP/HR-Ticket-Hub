@@ -171,6 +171,7 @@
         const createTicketView = document.getElementById('create-ticket-view');
         const passwordModal = document.getElementById('password-modal');
         let currentUser = null;
+        let chatbotContext = {};
 
         function showView(viewName) { if (viewName === 'create') { viewTicketsView.style.display = 'none'; createTicketView.style.display = 'block'; } else { createTicketView.style.display = 'none'; viewTicketsView.style.display = 'block'; } }
         function getStatusBadge(status) { const base = 'text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full'; switch (status) { case 'Open': return `<span class="bg-blue-100 text-blue-800 ${base}">Open</span>`; case 'Assigned': return `<span class="bg-yellow-100 text-yellow-800 ${base}">Assigned</span>`; case 'In Progress': return `<span class="bg-purple-100 text-purple-800 ${base}">In Progress</span>`; case 'Closed': return `<span class="bg-green-100 text-green-800 ${base}">Closed</span>`; default: return `<span class="bg-gray-100 text-gray-800 ${base}">${status}</span>`; } }
@@ -206,82 +207,256 @@
         }
         
         // --- CHATBOT FUNCTIONS ---
-        function appendMessage(message, sender) {
+                function appendMessage(message, sender, buttons, summary) {
             const messagesContainer = document.getElementById('chatbot-messages');
             const wrapper = document.createElement('div');
             const messageDiv = document.createElement('div');
+
+            // Add the main text message
             messageDiv.innerHTML = message;
+            
+            // If there's a summary, add it
+            if (summary) {
+                const summaryDiv = document.createElement('div');
+                summaryDiv.className = 'mt-2 p-2 border-t border-slate-300 text-xs';
+                summaryDiv.innerHTML = summary;
+                messageDiv.appendChild(summaryDiv);
+            }
+
             wrapper.className = 'flex';
             if (sender === 'user') {
                 wrapper.classList.add('justify-end');
                 messageDiv.className = 'text-sm p-2 bg-blue-500 text-white rounded-lg';
             } else {
-                messageDiv.className = 'text-sm p-2 bg-slate-200 rounded-lg';
+                messageDiv.className = 'text-sm p-2 bg-slate-200 rounded-lg w-full'; // Make bot messages full width
             }
+            
             wrapper.appendChild(messageDiv);
+
+            // --- NEW: RENDER BUTTONS ---
+            if (buttons && buttons.length > 0) {
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.className = 'mt-2 flex flex-col items-start gap-2';
+                buttons.forEach(btn => {
+                    const buttonEl = document.createElement('button');
+                    buttonEl.textContent = btn.text;
+                    buttonEl.dataset.payload = btn.payload; // Store payload in data attribute
+                    buttonEl.className = 'chatbot-button text-sm bg-white border border-blue-500 text-blue-600 font-semibold py-1 px-3 rounded-lg hover:bg-blue-50';
+                    buttonsContainer.appendChild(buttonEl);
+                });
+                messageDiv.appendChild(buttonsContainer);
+            }
+            // --- END OF NEW LOGIC ---
+
             messagesContainer.appendChild(wrapper);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        async function sendMessage() {
+        // async function sendMessage() {
+        //     const inputEl = document.getElementById('chatbot-input');
+        //     const question = inputEl.value.trim();
+        //     if (!question) return;
+        //     appendMessage(question, 'user');
+        //     inputEl.value = '';
+        //     appendMessage("...", 'bot'); // Typing indicator
+        //     try {
+        //         const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getChatbotAnswer', question }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+        //         const result = await res.json();
+        //         document.getElementById('chatbot-messages').lastChild.remove(); // Remove typing indicator
+        //         if (result.status === 'success') { appendMessage(result.answer, 'bot'); } else { appendMessage("Sorry, an error occurred.", 'bot'); }
+        //     } catch (error) { document.getElementById('chatbot-messages').lastChild.remove(); appendMessage("Sorry, couldn't connect to server.", 'bot'); }
+        // }
+
+                 // This replaces the old sendMessage function
+        async function sendMessage(userInput) {
             const inputEl = document.getElementById('chatbot-input');
-            const question = inputEl.value.trim();
-            if (!question) return;
-            appendMessage(question, 'user');
-            inputEl.value = '';
-            appendMessage("...", 'bot'); // Typing indicator
+            if (!userInput) return; // Don't send empty messages
+
+            // If the message is from a user typing, show their message
+            // If it's from a button payload, we can choose to show it or not. Let's show it.
+            const buttonClicked = userInput.startsWith('_action_');
+            if (!buttonClicked) {
+                 appendMessage(userInput, 'user');
+            }
+            
+            inputEl.value = ''; // Clear input
+            inputEl.disabled = true; // Disable input while waiting for bot
+            appendMessage("...", 'bot');
+
             try {
-                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getChatbotAnswer', question }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                const payload = {
+                    action: 'getChatbotAnswer',
+                    userInput: userInput, // Use a consistent key
+                    context: chatbotContext,
+                    userId: currentUser.userId,
+                    userName: currentUser.fullName
+                };
+
+                const res = await fetch(WEB_APP_URL, { 
+                    method: 'POST', 
+                    body: JSON.stringify(payload).replace("userInput", "question"), // Fix for backend expecting "question"
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+                });
                 const result = await res.json();
-                document.getElementById('chatbot-messages').lastChild.remove(); // Remove typing indicator
-                if (result.status === 'success') { appendMessage(result.answer, 'bot'); } else { appendMessage("Sorry, an error occurred.", 'bot'); }
-            } catch (error) { document.getElementById('chatbot-messages').lastChild.remove(); appendMessage("Sorry, couldn't connect to server.", 'bot'); }
+                
+                document.getElementById('chatbot-messages').lastChild.remove();
+                
+                if (result.status === 'success') {
+                    appendMessage(result.answer, 'bot', result.buttons, result.summary);
+                    chatbotContext = result.context || {};
+                    // Only re-enable the input if there are no buttons to guide the user
+                    if (!result.buttons || result.buttons.length === 0) {
+                        inputEl.disabled = false;
+                        inputEl.focus();
+                    }
+                } else {
+                    appendMessage("Sorry, an error occurred.", 'bot');
+                    chatbotContext = {};
+                    inputEl.disabled = false;
+                }
+            } catch (error) {
+                // Handle errors...
+                document.getElementById('chatbot-messages').lastChild.remove();
+                appendMessage("Connection error.", 'bot');
+                chatbotContext = {};
+                inputEl.disabled = false;
+            }
         }
         
-        function setupEventListeners() {
-            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+                function setupEventListeners() {
+            // --- TICKET VIEW & FORM LISTENERS (Original) ---
+            document.getElementById('logout-btn').addEventListener('click', () => { 
+                sessionStorage.removeItem('loggedInUser'); 
+                window.location.href = 'index.html'; 
+            });
             document.getElementById('show-create-form-btn').addEventListener('click', () => showView('create'));
             document.getElementById('cancel-creation-btn').addEventListener('click', () => showView('list'));
             document.getElementById('newTicketForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const btn = document.getElementById('submitButton');
-                btn.disabled = true; btn.textContent = 'Submitting...';
-                const data = { issue: issue.value, type: type.value, description: description.value, isConfidential: confidential.checked, createdBy: currentUser.userId, createdByName: currentUser.fullName };
+                btn.disabled = true; 
+                btn.textContent = 'Submitting...';
+                const data = { 
+                    issue: issue.value, 
+                    type: type.value, 
+                    description: description.value, 
+                    isConfidential: confidential.checked, 
+                    createdBy: currentUser.userId, 
+                    createdByName: currentUser.fullName 
+                };
                 try {
-                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'createTicket', ticketData: data }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-                    if ((await res.json()).status === 'success') { document.getElementById('newTicketForm').reset(); fetchTickets(currentUser.userId); showView('list'); }
-                } catch(e) { alert('Connection error.'); } finally { btn.disabled = false; btn.textContent = 'Submit Ticket'; }
+                    const res = await fetch(WEB_APP_URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: 'createTicket', ticketData: data }), 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+                    });
+                    if ((await res.json()).status === 'success') { 
+                        document.getElementById('newTicketForm').reset(); 
+                        fetchTickets(currentUser.userId); 
+                        showView('list'); 
+                    }
+                } catch(e) { 
+                    alert('Connection error.'); 
+                } finally { 
+                    btn.disabled = false; 
+                    btn.textContent = 'Submit Ticket'; 
+                }
             });
-            document.getElementById('filter-container').addEventListener('click', (e) => { if (e.target.classList.contains('filter-btn')) { document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-white', 'text-blue-600', 'shadow')); e.target.classList.add('bg-white', 'text-blue-600', 'shadow'); const s = e.target.dataset.status; document.querySelectorAll('.ticket-card').forEach(c => c.style.display = (s === 'All' || c.dataset.status === s) ? 'block' : 'none'); } });
+            document.getElementById('filter-container').addEventListener('click', (e) => { 
+                if (e.target.classList.contains('filter-btn')) { 
+                    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-white', 'text-blue-600', 'shadow')); 
+                    e.target.classList.add('bg-white', 'text-blue-600', 'shadow'); 
+                    const s = e.target.dataset.status; 
+                    document.querySelectorAll('.ticket-card').forEach(c => c.style.display = (s === 'All' || c.dataset.status === s) ? 'block' : 'none'); 
+                } 
+            });
             
-            // Password Modal Listeners
+            // --- PASSWORD MODAL LISTENERS (Original) ---
             document.getElementById('change-password-btn').addEventListener('click', () => passwordModal.classList.remove('hidden'));
-            document.getElementById('close-pw-modal-btn').addEventListener('click', () => { passwordModal.classList.add('hidden'); document.getElementById('change-password-form').reset(); document.getElementById('pw-form-message').textContent = ''; });
+            document.getElementById('close-pw-modal-btn').addEventListener('click', () => { 
+                passwordModal.classList.add('hidden'); 
+                document.getElementById('change-password-form').reset(); 
+                document.getElementById('pw-form-message').textContent = ''; 
+            });
             document.getElementById('change-password-form').addEventListener('submit', async (e) => {
                 e.preventDefault();
                 const msgEl = document.getElementById('pw-form-message'), btn = document.getElementById('pw-submit-btn');
                 const [oldPw, newPw, confPw] = [document.getElementById('old-password').value, document.getElementById('new-password').value, document.getElementById('confirm-password').value];
-                if (newPw !== confPw) { msgEl.textContent = 'New passwords do not match.'; msgEl.className = 'text-red-600'; return; }
-                btn.disabled = true; btn.textContent = 'Updating...';
+                if (newPw !== confPw) { 
+                    msgEl.textContent = 'New passwords do not match.'; 
+                    msgEl.className = 'text-red-600'; 
+                    return; 
+                }
+                btn.disabled = true; 
+                btn.textContent = 'Updating...';
                 try {
-                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'changePassword', data: { userId: currentUser.userId, oldPassword: oldPw, newPassword: newPw } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                    const res = await fetch(WEB_APP_URL, { 
+                        method: 'POST', 
+                        body: JSON.stringify({ action: 'changePassword', data: { userId: currentUser.userId, oldPassword: oldPw, newPassword: newPw } }), 
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
+                    });
                     const result = await res.json();
                     msgEl.textContent = result.message;
                     msgEl.className = result.status === 'success' ? 'text-green-600' : 'text-red-600';
                     if(result.status === 'success') setTimeout(() => document.getElementById('close-pw-modal-btn').click(), 2000);
-                } catch(e) { msgEl.textContent = 'Connection error.'; msgEl.className = 'text-red-600'; }
-                finally { btn.disabled = false; btn.textContent = 'Update Password'; }
+                } catch(e) { 
+                    msgEl.textContent = 'Connection error.'; 
+                    msgEl.className = 'text-red-600'; 
+                }
+                finally { 
+                    btn.disabled = false; 
+                    btn.textContent = 'Update Password'; 
+                }
             });
             
-            // Chatbot Listeners
-            document.getElementById('chatbot-toggle-btn').addEventListener('click', () => document.getElementById('chatbot-window').classList.toggle('scale-0'));
-            document.getElementById('chatbot-send-btn').addEventListener('click', sendMessage);
-            document.getElementById('chatbot-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') sendMessage(); });
+            // --- NEXT-GEN CHATBOT LISTENERS (New & Updated) ---
+            let isChatStarted = false;
+            document.getElementById('chatbot-toggle-btn').addEventListener('click', () => {
+                const chatbotWindow = document.getElementById('chatbot-window');
+                chatbotWindow.classList.toggle('scale-0');
+
+                // If the bot is being opened for the first time, send the welcome message
+                if (!isChatStarted && !chatbotWindow.classList.contains('scale-0')) {
+                    isChatStarted = true;
+                    sendMessage('_action_start'); // Trigger the welcome flow
+                }
+            });
+
+            // Send message from the text input on button click or Enter key
+            document.getElementById('chatbot-send-btn').addEventListener('click', () => sendMessage(document.getElementById('chatbot-input').value.trim()));
+            document.getElementById('chatbot-input').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    sendMessage(document.getElementById('chatbot-input').value.trim());
+                }
+            });
+
+            // Master event listener for all chatbot button clicks (using event delegation)
+            document.getElementById('chatbot-messages').addEventListener('click', function(e) {
+                // We only care about clicks on elements with the 'chatbot-button' class
+                if (e.target.classList.contains('chatbot-button')) {
+                    const payload = e.target.dataset.payload;
+                    const buttonText = e.target.textContent;
+                    
+                    // 1. Show the user's choice in the chat history
+                    appendMessage(buttonText, 'user');
+                    
+                    // 2. Send the internal payload to the server for the next step
+                    sendMessage(payload);
+                    
+                    // 3. Disable all buttons in the same group to prevent re-clicks
+                    const buttonGroup = e.target.parentElement.querySelectorAll('.chatbot-button');
+                    buttonGroup.forEach(btn => {
+                        btn.disabled = true;
+                        btn.style.cursor = 'not-allowed';
+                        btn.classList.add('bg-slate-100', 'border-slate-300', 'text-slate-400');
+                        btn.classList.remove('hover:bg-blue-50');
+                    });
+                }
+            });
         }
     </script>
 </body>
 </html>
-
 
 
 
