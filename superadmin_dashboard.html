@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- IMPORTANT: Add Chart.js library for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-slate-100 antialiased">
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-slate-800">Command Dashboard</h1>
+            <div class="flex items-center gap-4">
+                <div id="userInfo" class="text-right"></div>
+                <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <!-- Main Navigation Links -->
+             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <a href="superadmin.html" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
+                    <h2 class="text-2xl font-bold text-blue-600">Ticket Overview</h2>
+                    <p class="text-slate-500 mt-1">View, filter, and manage all system tickets.</p>
+                </a>
+                <a href="manage_users.html" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
+                    <h2 class="text-2xl font-bold text-slate-700">Manage Users</h2>
+                    <p class="text-slate-500 mt-1">Add, edit, or remove user accounts.</p>
+                </a>
+            </div>
+
+            <!-- KPI Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-slate-500 font-semibold">Total Tickets</h3>
+                    <p id="total-tickets" class="text-4xl font-bold text-slate-800 mt-2">--</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-slate-500 font-semibold">Open Tickets</h3>
+                    <p id="open-tickets" class="text-4xl font-bold text-blue-600 mt-2">--</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-slate-500 font-semibold">Assigned Tickets</h3>
+                    <p id="assigned-tickets" class="text-4xl font-bold text-yellow-500 mt-2">--</p>
+                </div>
+                 <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-slate-500 font-semibold">Tickets Closed</h3>
+                    <p id="closed-tickets" class="text-4xl font-bold text-green-600 mt-2">--</p>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Tickets by Category</h3>
+                    <!-- THIS IS THE FIX: Added a wrapper div with a defined height -->
+                    <div class="relative h-80">
+                        <canvas id="ticketsByCategoryChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Tickets by Status</h3>
+                    <!-- The doughnut chart also benefits from this structure -->
+                    <div class="relative h-80">
+                        <canvas id="ticketsByStatusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            if (!currentUser || currentUser.role !== 'Super Admin') {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
+            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'login.html'; });
+            fetchDashboardData();
+        });
+
+        async function fetchDashboardData() {
+            try {
+                const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getSuperAdminTickets' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
+                const result = await response.json();
+                if (result.status === 'success') {
+                    const tickets = result.tickets;
+                    populateKpiCards(tickets);
+                    renderCharts(tickets);
+                } else {
+                    alert('Could not load dashboard data.');
+                }
+            } catch (error) {
+                alert('Connection error while fetching dashboard data.');
+            }
+        }
+
+        function populateKpiCards(tickets) {
+            document.getElementById('total-tickets').textContent = tickets.length;
+            document.getElementById('open-tickets').textContent = tickets.filter(t => t.Status === 'Open').length;
+            document.getElementById('assigned-tickets').textContent = tickets.filter(t => t.Status === 'Assigned' || t.Status === 'In Progress').length;
+            document.getElementById('closed-tickets').textContent = tickets.filter(t => t.Status === 'Closed').length;
+        }
+
+        function renderCharts(tickets) {
+            // 1. Tickets by Status (Doughnut Chart)
+            const statusCounts = tickets.reduce((acc, ticket) => {
+                acc[ticket.Status] = (acc[ticket.Status] || 0) + 1;
+                return acc;
+            }, {});
+
+            const statusCtx = document.getElementById('ticketsByStatusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(statusCounts),
+                    datasets: [{
+                        label: 'Tickets by Status',
+                        data: Object.values(statusCounts),
+                        backgroundColor: ['#3B82F6', '#FBBF24', '#10B981', '#A855F7', '#6B7280'],
+                        hoverOffset: 4
+                    }]
+                },
+                 options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            // 2. Tickets by Category (Bar Chart)
+            const categoryCounts = tickets.reduce((acc, ticket) => {
+                acc[ticket.Issue] = (acc[ticket.Issue] || 0) + 1;
+                return acc;
+            }, {});
+
+            const categoryCtx = document.getElementById('ticketsByCategoryChart').getContext('2d');
+            new Chart(categoryCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(categoryCounts),
+                    datasets: [{
+                        label: 'Number of Tickets',
+                        data: Object.values(categoryCounts),
+                        backgroundColor: '#3B82F6',
+                        borderColor: '#1E40AF',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: { y: { beginAtZero: true } },
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+    </script>
+</body>
+</html>
