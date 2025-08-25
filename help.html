@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HR Ticket Hub — Help & Getting Started</title>
+  <meta name="description" content="How to use the HR Ticket Hub: getting started, raising and tracking tickets, and contacting HR support." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#0b1220;           /* page background */
+      --panel:#0f172a;        /* card bg */
+      --muted:#94a3b8;        /* secondary text */
+      --text:#e2e8f0;         /* primary text */
+      --accent:#22c55e;       /* green */
+      --accent-2:#38bdf8;     /* blue */
+      --ring: rgba(56,189,248,.35);
+      --radius: 18px;
+      --shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.03);
+      --gradient: radial-gradient(1200px 600px at 10% -10%, rgba(56,189,248,.25), transparent 60%),
+                  radial-gradient(1000px 500px at 110% -20%, rgba(34,197,94,.20), transparent 60%),
+                  linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,0));
+    }
+    html,body{height:100%}
+    *{box-sizing:border-box}
+    body{
+      margin:0; font-family:Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color:var(--text); background: var(--bg);
+      background-image: var(--gradient);
+      line-height:1.6; letter-spacing:.2px;
+    }
+    a{color:var(--accent-2); text-decoration:none}
+    a:hover{text-decoration:underline}
+
+    .container{max-width:1100px; margin:40px auto; padding:0 20px}
+
+    /* Header */
+    .hero{
+      position:relative; overflow:hidden; border-radius: var(--radius);
+      padding:28px 26px; background:linear-gradient(180deg, #0b1220 0%, #0e1a2f 100%);
+      box-shadow: var(--shadow);
+      border:1px solid rgba(148,163,184,.18);
+      display:flex; gap:18px; align-items:center;
+    }
+    .badge{display:inline-flex; align-items:center; gap:8px; font-weight:600; font-size:12px; color:#cffafe; background:rgba(8,145,178,.2); padding:6px 10px; border-radius:999px; border:1px solid rgba(34,211,238,.35)}
+    .hero h1{margin:.2rem 0 .6rem; font-size: clamp(22px, 4vw, 34px); letter-spacing:.5px}
+    .hero p{margin:0; color:var(--muted)}
+
+    .actions{margin-left:auto; display:flex; gap:10px; flex-wrap:wrap}
+    .btn{appearance:none; border:1px solid rgba(148,163,184,.25); background:#0a1426; color:var(--text);
+      padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; transition:.2s ease; box-shadow:var(--shadow)}
+    .btn:hover{transform:translateY(-1px); border-color:rgba(148,163,184,.45)}
+    .btn.primary{background:linear-gradient(180deg,#10b981,#059669); border-color:transparent}
+
+    /* Layout */
+    .grid{display:grid; grid-template-columns: 280px 1fr; gap:22px; margin-top:22px}
+    @media (max-width: 880px){.grid{grid-template-columns:1fr}}
+
+    /* Sidebar */
+    .sidebar{position:sticky; top:16px; align-self:start; background:rgba(15,23,42,.7); border:1px solid rgba(148,163,184,.18);
+      border-radius: var(--radius); padding:16px; box-shadow: var(--shadow)}
+    .sidebar h3{margin:0 0 8px; font-size:13px; color:#c7d2fe; letter-spacing:.6px; text-transform:uppercase}
+    .toc{display:grid; gap:6px}
+    .toc a{padding:8px 10px; border-radius:10px; border:1px solid transparent}
+    .toc a:hover{background:rgba(148,163,184,.08); border-color:rgba(148,163,184,.18)}
+
+    /* Cards / Sections */
+    section.card{background:var(--panel); border:1px solid rgba(148,163,184,.18); box-shadow: var(--shadow);
+      border-radius: var(--radius); padding:20px}
+    section.card h2{margin:0 0 10px; font-size: clamp(18px, 3vw, 24px)}
+    section.card p.lead{color:#cbd5e1; margin-top:4px}
+
+    .steps{display:grid; gap:12px; padding-left:0; list-style:none; counter-reset:step}
+    .steps li{position:relative; padding:14px 14px 14px 48px; border:1px solid rgba(148,163,184,.18);
+      border-radius:14px; background:rgba(2,6,23,.35)}
+    .steps li::before{counter-increment:step; content: counter(step);
+      position:absolute; left:12px; top:50%; transform:translateY(-50%);
+      width:26px; height:26px; border-radius:8px; display:grid; place-items:center;
+      font-weight:700; background:linear-gradient(180deg,#38bdf8,#0ea5e9); color:#001220; box-shadow:0 2px 10px rgba(56,189,248,.35)}
+
+    .callout{display:flex; gap:12px; align-items:flex-start; padding:12px 14px; border-radius:14px; background:rgba(34,197,94,.10); border:1px solid rgba(34,197,94,.35)}
+
+    .status{display:flex; gap:8px; flex-wrap:wrap}
+    .chip{display:inline-flex; gap:8px; align-items:center; padding:8px 10px; border-radius:999px; border:1px solid rgba(148,163,184,.25); background:rgba(2,6,23,.35); font-weight:600; font-size:12px}
+    .dot{width:8px; height:8px; border-radius:50%}
+    .open{background:#fcd34d}
+    .progress{background:#38bdf8}
+    .resolved{background:#22c55e}
+    .closed{background:#94a3b8}
+
+    details{background:rgba(2,6,23,.35); border:1px solid rgba(148,163,184,.18); border-radius:12px; padding:12px 14px}
+    details summary{cursor:pointer; font-weight:600}
+
+    footer{opacity:.8; text-align:center; font-size:12px; margin:26px 0}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="hero" role="banner" aria-label="HR Ticket Hub Help">
+      <div>
+        <span class="badge" aria-label="Help & Support badge">🧭 Quick Start Guide</span>
+        <h1>HR Ticket Hub — Help / Getting Started</h1>
+        <p>Everything you need to know to navigate the portal, raise tickets, track progress, and contact HR support.</p>
+      </div>
+      <div class="actions">
+        <a class="btn" href="index.html" aria-label="Back to Login">← Back to Login</a>
+        <!-- <a class="btn primary" href="raise-ticket.html" aria-label="Raise a Ticket">Raise a Ticket</a> -->
+      </div>
+    </header>
+
+    <main class="grid" id="content" role="main">
+      <!-- Sidebar TOC -->
+      <aside class="sidebar" aria-label="On this page">
+        <h3>On this page</h3>
+        <nav class="toc">
+          <a href="#use-the-portal">1. How to Use the Portal</a>
+          <a href="#raising-a-ticket">2. Raising a Ticket</a>
+          <a href="#tracking-your-ticket">3. Tracking Your Ticket</a>
+          <a href="#contact-hr">4. Contact HR Support</a>
+        </nav>
+      </aside>
+
+      <div class="content">
+        <!-- 1. How to Use the Portal -->
+        <section id="use-the-portal" class="card" aria-labelledby="use-the-portal-heading">
+          <h2 id="use-the-portal-heading">1) How to Use the Portal</h2>
+          <p class="lead">Navigate through categories, stay updated on your requests, and get hassle‑free HR support.</p>
+          <ul class="steps">
+            <li>
+              <strong>Explore Categories:</strong> Use the main menu to access <em>Leave</em>, <em>Payroll</em>, <em>Policies</em>, <em>Benefits</em>, and more.
+            </li>
+            <li>
+              <strong>Real‑time Progress:</strong> Track your ticket status live as HR takes actions or adds comments.
+            </li>
+            <li>
+              <strong>Transparent Support:</strong> Every action is time‑stamped so you always know what’s happening.
+            </li>
+          </ul>
+          <div class="callout" role="note" aria-label="Tip: Best experience">
+            <div>💡</div>
+            <div>
+              Tip: Keep your profile details updated so HR can resolve issues faster and notify you without delays.
+            </div>
+          </div>
+        </section>
+
+        <!-- 2. Raising a Ticket -->
+        <section id="raising-a-ticket" class="card" aria-labelledby="raising-a-ticket-heading">
+          <h2 id="raising-a-ticket-heading">2) Raising a Ticket</h2>
+          <ol class="steps" style="counter-reset: step 0;">
+            <li><strong>Open:</strong> From the home screen, choose <em>“Raise a Ticket”</em>.</li>
+            <li><strong>Select Category:</strong> Pick the most relevant option (e.g., Leave, Payroll, Benefits, etc.).</li>
+            <li><strong>Describe Clearly:</strong> Enter details of your request with all relevant information.</li>
+            <li><strong>Attach Documents:</strong> Add any supporting files/screenshots if required.</li>
+            <li><strong>Submit:</strong> Click <em>Submit</em>. You will receive a unique <strong>Ticket ID</strong> for tracking.</li>
+          </ol>
+        </section>
+
+        <!-- 3. Tracking Your Ticket -->
+        <section id="tracking-your-ticket" class="card" aria-labelledby="tracking-your-ticket-heading">
+          <h2 id="tracking-your-ticket-heading">3) Tracking Your Ticket</h2>
+          <p class="lead">Monitor progress anytime from <em>My Tickets</em>.</p>
+          <ul class="steps">
+            <li><strong>Open My Tickets:</strong> Find it in the app menu.</li>
+            <li><strong>View Lists:</strong> See <em>Active</em> and <em>Closed</em> tickets with latest updates.</li>
+            <li><strong>Status Checks:</strong> Track states like <em>Open</em>, <em>In Progress</em>, <em>Resolved</em>, and <em>Closed</em>.</li>
+            <li><strong>Stay Notified:</strong> Receive alerts whenever HR updates your ticket or adds a comment.</li>
+          </ul>
+          <div class="status" aria-label="Ticket status legend">
+            <span class="chip"><span class="dot open" aria-hidden="true"></span> Open</span>
+            <span class="chip"><span class="dot progress" aria-hidden="true"></span> In Progress</span>
+            <span class="chip"><span class="dot resolved" aria-hidden="true"></span> Resolved</span>
+            <span class="chip"><span class="dot closed" aria-hidden="true"></span> Closed</span>
+          </div>
+        </section>
+
+        <!-- 4. Contact HR Support -->
+        <section id="contact-hr" class="card" aria-labelledby="contact-hr-heading">
+          <h2 id="contact-hr-heading">4) Contact HR Support</h2>
+          <p class="lead">If your query needs personal attention, reach us directly from the HR Ticket Hub.</p>
+          <ul class="steps">
+            <li><strong>Contact Options:</strong> Choose chat, email, or call (as enabled by your organization).</li>
+            <li><strong>Email:</strong> <a href="mailto:hr_emp@gretexgroup.com">hr_emp@gretexgroup.com</a></li>
+            <li><strong>Faster Help:</strong> Share your <em>Ticket ID</em> (if already raised) for quicker resolution.</li>
+            <li><strong>Our Promise:</strong> The HR team is committed to timely and reliable support.</li>
+          </ul>
+          <details>
+            <summary>Troubleshooting tips</summary>
+            <ul>
+              <li>Can’t submit? Ensure all required fields are filled.</li>
+              <li>No updates? Refresh <em>My Tickets</em>.</li>
+              <!-- <li>Attachments not visible? Try re‑uploading or use a common format (PDF/PNG/JPG).</li> -->
+            </ul>
+          </details>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      © <span id="year"></span> HR Ticket Hub • Help Guide
+    </footer>
+  </div>
+
+  <script>
+    // current year
+    document.getElementById('year').textContent = new Date().getFullYear();
+    // smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', (e)=>{
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el){ e.preventDefault(); el.scrollIntoView({behavior:'smooth', block:'start'}); }
+      });
+    });
+  </script>
+</body>
+</html>
