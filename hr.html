@@ -87,7 +87,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
             if (!currentUser || currentUser.role !== 'HR') {
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
                 return;
             }
             document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
@@ -200,4 +200,5 @@
         }
     </script>
 </body>
+
 </html>
