@@ -20,7 +20,6 @@
   <!-- Right Side (Login Form) -->
   <div class="flex-1 flex flex-col justify-center items-center relative">
     
-    <!-- Top Right Button -->
     <div class="absolute top-6 right-6">
       <button onclick="window.location.href='ticket-hub.html'"
         class="px-5 py-2 rounded-full bg-blue-600 text-white font-semibold shadow-lg hover:bg-blue-700 transition">
@@ -31,7 +30,7 @@
     <!-- Login Card -->
     <div class="w-full max-w-md bg-white/90 shadow-2xl rounded-2xl border border-slate-200 p-10">
       <div class="mb-8 text-center">
-        <h2 class="text-3xl font-bold text-slate-800">Welcome to your Space 👋</h2>
+        <h4 class="text-3xl font-bold text-slate-800">Welcome to your Space👋</h4>
         <p class="mt-2 text-slate-500">Sign in to continue</p>
       </div>
 
@@ -52,13 +51,31 @@
           class="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition">
           Sign In
         </button>
-
         <p id="errorMessage" class="text-center text-red-600 font-semibold mt-3"></p>
       </form>
-
       <div class="mt-6 text-center text-sm">
-        <a href="#" class="text-blue-600 hover:underline">Forgot Password?</a> ·
-        <a href="#" class="text-blue-600 hover:underline">Create Account</a>
+        <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:underline">Forgot Password?</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Reset Password Modal (Hidden by default) -->
+  <div id="reset-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center z-50">
+    <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-10">
+      <div class="mb-6 text-center">
+        <h4 class="text-3xl font-bold text-slate-800">Forgot Password?</h4>
+        <p class="mt-2 text-slate-500">Enter your email and we'll send you a temporary password.</p>
+      </div>
+      <form id="resetForm" class="space-y-6">
+        <div>
+          <label for="reset-email" class="block text-sm font-semibold text-slate-700">Email Address</label>
+          <input id="reset-email" name="email" type="email" required class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"/>
+        </div>
+        <button type="submit" id="resetButton" class="w-full py-3 px-4 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700">Send Reset Email</button>
+        <p id="resetMessage" class="text-center font-semibold mt-3"></p>
+      </form>
+      <div class="mt-6 text-center text-sm">
+        <a href="#" id="backToLoginLink" class="text-blue-600 hover:underline">Back to Sign In</a>
       </div>
     </div>
   </div>
@@ -66,8 +83,16 @@
   <script>
     const loginForm = document.getElementById('loginForm');
     const errorMessage = document.getElementById('errorMessage');
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; 
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec';
 
+    // Elements for Reset Modal
+    const resetModal = document.getElementById('reset-modal');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const backToLoginLink = document.getElementById('backToLoginLink');
+    const resetForm = document.getElementById('resetForm');
+    const resetMessage = document.getElementById('resetMessage');
+    
+    // Login Form Logic
     loginForm.addEventListener('submit', async (e) => {
       e.preventDefault();
       errorMessage.textContent = '';
@@ -107,8 +132,49 @@
         loginButton.textContent = 'Sign In';
       }
     });
+
+    // Reset Modal Event Listeners
+    forgotPasswordLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetModal.classList.remove('hidden');
+    });
+
+    backToLoginLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        resetModal.classList.add('hidden');
+        resetMessage.textContent = ''; // Clear message when closing
+        resetForm.reset();
+    });
+    
+    resetForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        resetMessage.textContent = '';
+        const resetButton = document.getElementById('resetButton');
+        resetButton.disabled = true;
+        resetButton.textContent = 'Sending...';
+
+        const email = document.getElementById('reset-email').value;
+
+        try {
+            const response = await fetch(WEB_APP_URL, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'resetPassword', email }),
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            });
+            await response.json();
+            
+            // For security, always show a positive, generic message regardless of whether the email was found or not.
+            resetMessage.textContent = "If an account with this email exists, password reset instructions have been sent.";
+            resetMessage.className = 'text-center font-semibold text-green-600 mt-3';
+
+        } catch (error) {
+            resetMessage.textContent = "An error occurred. Please try again.";
+            resetMessage.className = 'text-center font-semibold text-red-600 mt-3';
+        } finally {
+            resetButton.disabled = false;
+            resetButton.textContent = 'Send Reset Email';
+        }
+    });
   </script>
 </body>
-</html>
-
-
+</html>```
