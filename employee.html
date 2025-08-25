@@ -149,6 +149,22 @@
         </button>
     </div> -->
 
+        <!-- FINAL FIX: Disable clicks on the container but re-enable them on the children -->
+    <div id="chatbot-container" class="fixed bottom-5 right-2 z-40 pointer-events-none"> <!-- ADD pointer-events-none -->
+        
+        <!-- The chatbot window re-enables pointer events for itself -->
+        <div id="chatbot-window" class="w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right pointer-events-auto"> <!-- ADD pointer-events-auto -->
+            <div class="bg-blue-600 text-white p-3 rounded-t-xl"><h3 class="font-bold text-center">HR Help Bot</h3></div>
+            <div id="chatbot-messages" class="flex-1 p-4 overflow-y-auto h-64 space-y-2"><div class="flex"><div class="text-sm p-2 bg-slate-200 rounded-lg">Hi! How can I help you today? Ask me about payroll, leave, dress code, etc.</div></div></div>
+            <div class="p-2 border-t flex"><input type="text" id="chatbot-input" class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask a question..."><button id="chatbot-send-btn" class="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 flex items-center justify-center font-bold text-2xl">&rarr;</button></div>
+        </div>
+
+        <!-- The toggle button also re-enables pointer events for itself -->
+        <button id="chatbot-toggle-btn" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto pointer-events-auto"> <!-- ADD pointer-events-auto -->
+            <svg class="w-8 h-8 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        </button>
+    </div>
+
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
         const viewTicketsView = document.getElementById('view-tickets-view');
@@ -265,6 +281,7 @@
     </script>
 </body>
 </html>
+
 
 
 
