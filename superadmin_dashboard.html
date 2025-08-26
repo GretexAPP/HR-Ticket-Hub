@@ -7,6 +7,18 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- IMPORTANT: Add Chart.js library for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Simple styling for better UX on chatbot buttons */
+        .chatbot-button:disabled {
+            cursor: not-allowed;
+            background-color: #f1f5f9; /* slate-100 */
+            border-color: #cbd5e1; /* slate-300 */
+            color: #94a3b8; /* slate-400 */
+        }
+        .chatbot-button:disabled:hover {
+            background-color: #f1f5f9; /* slate-100 */
+        }
+    </style>
 </head>
 <body class="bg-slate-100 antialiased">
     <header class="bg-white shadow-sm sticky top-0 z-20">
@@ -57,14 +69,12 @@
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-xl font-bold text-slate-800 mb-4">Tickets by Category</h3>
-                    <!-- THIS IS THE FIX: Added a wrapper div with a defined height -->
                     <div class="relative h-80">
                         <canvas id="ticketsByCategoryChart"></canvas>
                     </div>
                 </div>
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-xl font-bold text-slate-800 mb-4">Tickets by Status</h3>
-                    <!-- The doughnut chart also benefits from this structure -->
                     <div class="relative h-80">
                         <canvas id="ticketsByStatusChart"></canvas>
                     </div>
@@ -73,9 +83,41 @@
         </div>
     </main>
 
+    <!-- SUPER ADMIN COMMAND BOT INTERFACE -->
+    <div id="sa-chatbot-container" class="fixed bottom-5 right-5 z-40">
+        <div id="sa-chatbot-window" class="w-96 h-[500px] bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right transition-transform">
+            <div class="bg-slate-800 text-white p-3 rounded-t-xl">
+                <h3 class="font-bold text-center">Command Assistant</h3>
+            </div>
+            <div id="sa-chatbot-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <!-- Welcome Message -->
+                <div class="flex">
+                    <div class="text-sm p-3 bg-slate-200 rounded-lg">
+                        <p class="font-semibold mb-2">Ready for commands. Try things like:</p>
+                        <ul class="list-disc list-inside text-xs space-y-1">
+                            <li>create new user</li>
+                            <li>delete user</li>
+                            <li>reset password for EMP123</li>
+                            <li>show all open tickets</li>
+                            <li>generate category summary</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 border-t flex">
+                <input type="text" id="sa-chatbot-input" class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-slate-500" placeholder="Enter command or 'cancel'">
+                <button id="sa-chatbot-send-btn" class="bg-slate-800 text-white px-4 rounded-r-md hover:bg-slate-900 flex items-center justify-center font-bold text-2xl">&rarr;</button>
+            </div>
+        </div>
+        <button id="sa-chatbot-toggle-btn" class="bg-slate-800 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto cursor-pointer">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
+        </button>
+    </div>
+
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
         let currentUser = null;
+        let botContext = {}; // Context for the command bot
 
         document.addEventListener('DOMContentLoaded', () => {
             currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
@@ -86,8 +128,10 @@
             document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
             document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
             fetchDashboardData();
+            setupBotListeners();
         });
 
+        // --- DASHBOARD & CHART FUNCTIONS ---
         async function fetchDashboardData() {
             try {
                 const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getSuperAdminTickets' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
@@ -113,51 +157,162 @@
 
         function renderCharts(tickets) {
             // 1. Tickets by Status (Doughnut Chart)
-            const statusCounts = tickets.reduce((acc, ticket) => {
-                acc[ticket.Status] = (acc[ticket.Status] || 0) + 1;
-                return acc;
-            }, {});
-
+            const statusCounts = tickets.reduce((acc, ticket) => { acc[ticket.Status] = (acc[ticket.Status] || 0) + 1; return acc; }, {});
             const statusCtx = document.getElementById('ticketsByStatusChart').getContext('2d');
             new Chart(statusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(statusCounts),
-                    datasets: [{
-                        label: 'Tickets by Status',
-                        data: Object.values(statusCounts),
-                        backgroundColor: ['#3B82F6', '#FBBF24', '#10B981', '#A855F7', '#6B7280'],
-                        hoverOffset: 4
-                    }]
-                },
-                 options: { responsive: true, maintainAspectRatio: false }
+                type: 'doughnut', data: { labels: Object.keys(statusCounts), datasets: [{ data: Object.values(statusCounts), backgroundColor: ['#3B82F6', '#FBBF24', '#10B981', '#A855F7', '#6B7280'], hoverOffset: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false }
             });
 
             // 2. Tickets by Category (Bar Chart)
-            const categoryCounts = tickets.reduce((acc, ticket) => {
-                acc[ticket.Issue] = (acc[ticket.Issue] || 0) + 1;
-                return acc;
-            }, {});
-
+            const categoryCounts = tickets.reduce((acc, ticket) => { acc[ticket.Issue] = (acc[ticket.Issue] || 0) + 1; return acc; }, {});
             const categoryCtx = document.getElementById('ticketsByCategoryChart').getContext('2d');
             new Chart(categoryCtx, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(categoryCounts),
-                    datasets: [{
-                        label: 'Number of Tickets',
-                        data: Object.values(categoryCounts),
-                        backgroundColor: '#3B82F6',
-                        borderColor: '#1E40AF',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: { y: { beginAtZero: true } },
-                    responsive: true,
-                    maintainAspectRatio: false
+                type: 'bar', data: { labels: Object.keys(categoryCounts), datasets: [{ label: 'Number of Tickets', data: Object.values(categoryCounts), backgroundColor: '#3B82F6' }] },
+                options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        // --- SUPER ADMIN BOT SCRIPT ---
+        function setupBotListeners() {
+            const saChatWindow = document.getElementById('sa-chatbot-window');
+            const saInput = document.getElementById('sa-chatbot-input');
+            const saMessagesContainer = document.getElementById('sa-chatbot-messages');
+
+            document.getElementById('sa-chatbot-toggle-btn').addEventListener('click', () => {
+                saChatWindow.classList.toggle('scale-0');
+            });
+
+            document.getElementById('sa-chatbot-send-btn').addEventListener('click', () => sendCommand());
+            saInput.addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') sendCommand();
+            });
+
+            // Master listener for button clicks
+            saMessagesContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('chatbot-button')) {
+                    const payload = e.target.dataset.payload;
+                    const buttonText = e.target.textContent;
+                    appendMessage(buttonText, 'user');
+                    // Disable the buttons after clicking
+                    e.target.parentElement.querySelectorAll('.chatbot-button').forEach(btn => btn.disabled = true);
+                    sendCommand(payload);
                 }
             });
+        }
+        
+        async function sendCommand(commandOverride) {
+            const saInput = document.getElementById('sa-chatbot-input');
+            const command = commandOverride || saInput.value.trim();
+            if (!command) return;
+
+            if (!commandOverride) {
+                appendMessage(command, 'user');
+            }
+            saInput.value = '';
+            saInput.disabled = true;
+            appendMessage("...", 'bot');
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ 
+                        action: 'executeSuperAdminCommand', 
+                        command: command,
+                        context: botContext 
+                    }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await res.json();
+                
+                document.getElementById('sa-chatbot-messages').lastChild.remove();
+
+                if (result.status === 'success') {
+                    botContext = result.context || {};
+                    appendMessage(result.data, 'bot', result.responseType, result.buttons);
+                } else {
+                    appendMessage("An error occurred: " + result.message, 'bot', 'text');
+                    botContext = {};
+                }
+            } catch (error) {
+                document.getElementById('sa-chatbot-messages').lastChild.remove();
+                appendMessage("Connection error.", 'bot', 'text');
+                botContext = {};
+            } finally {
+                saInput.disabled = false;
+                saInput.focus();
+            }
+        }
+
+        function appendMessage(data, sender, type = 'text', buttons = []) {
+            const saMessagesContainer = document.getElementById('sa-chatbot-messages');
+            const wrapper = document.createElement('div');
+            wrapper.className = 'flex';
+            
+            let messageContent;
+            if (sender === 'user') {
+                wrapper.classList.add('justify-end');
+                messageContent = `<div class="text-sm p-2 bg-blue-500 text-white rounded-lg max-w-xs break-words">${data}</div>`;
+            } else {
+                switch (type) {
+                    case 'ticket_list': messageContent = renderTicketList(data); break;
+                    case 'user_details': messageContent = renderUserDetails(data); break;
+                    case 'report_summary': messageContent = renderReportSummary(data); break;
+                    default: messageContent = `<div class="text-sm p-3 bg-slate-200 rounded-lg max-w-md break-words">${data}</div>`;
+                }
+            }
+            wrapper.innerHTML = messageContent;
+
+            if (sender === 'bot' && buttons && buttons.length > 0) {
+                const buttonsContainer = document.createElement('div');
+                buttonsContainer.className = 'mt-2 flex flex-wrap gap-2';
+                buttons.forEach(btn => {
+                    const buttonEl = document.createElement('button');
+                    buttonEl.textContent = btn.text;
+                    buttonEl.dataset.payload = btn.payload;
+                    buttonEl.className = 'chatbot-button text-sm bg-white border border-slate-500 text-slate-700 font-semibold py-1 px-3 rounded-lg hover:bg-slate-100';
+                    buttonsContainer.appendChild(buttonEl);
+                });
+                wrapper.querySelector('div').appendChild(buttonsContainer);
+            }
+
+            saMessagesContainer.appendChild(wrapper);
+            saMessagesContainer.scrollTop = saMessagesContainer.scrollHeight;
+        }
+
+        // --- RENDER FUNCTIONS FOR RICH RESPONSES ---
+        function renderTicketList(tickets) {
+            let ticketsHtml = tickets.slice(0, 10).map(t => `
+                <div class="border-t p-2">
+                    <p class="font-bold">${t.Issue} <span class="text-xs font-normal text-slate-500">(${t.TicketID})</span></p>
+                    <p class="text-xs"><b>Status:</b> ${t.Status} | <b>By:</b> ${t.CreatedBy} | <b>To:</b> ${t.AssignedTo || 'N/A'}</p>
+                </div>
+            `).join('');
+            const footer = tickets.length > 10 ? `<div class="text-center text-xs p-1 border-t"><i>... and ${tickets.length - 10} more.</i></div>` : '';
+            return `<div class="text-sm bg-slate-50 rounded-lg w-full p-2">
+                        <h4 class="font-bold p-2 border-b">Found ${tickets.length} Ticket(s)</h4>
+                        ${ticketsHtml}${footer}
+                    </div>`;
+        }
+
+        function renderUserDetails(user) {
+            return `<div class="text-sm bg-slate-50 rounded-lg w-full p-3">
+                        <h4 class="font-bold text-lg border-b pb-2 mb-2">${user.FullName}</h4>
+                        <p><b>UserID:</b> ${user.UserID}</p>
+                        <p><b>Email:</b> ${user.Email}</p>
+                        <p><b>Role:</b> ${user.Role}</p>
+                    </div>`;
+        }
+
+        function renderReportSummary(report) {
+            let countsHtml = Object.entries(report.counts)
+                .sort(([,a],[,b]) => b-a) // Sort descending
+                .map(([key, value]) => `<tr><td class="p-1 pr-4">${key}</td><td class="p-1 font-bold text-right">${value}</td></tr>`)
+                .join('');
+            return `<div class="text-sm bg-slate-50 rounded-lg w-full p-2">
+                        <h4 class="font-bold p-2 border-b">${report.title}</h4>
+                        <table class="w-full mt-2">${countsHtml}</table>
+                    </div>`;
         }
     </script>
 </body>
