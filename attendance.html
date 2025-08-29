@@ -214,17 +214,69 @@ function updateSummaryCards(data) {
     }
 
     // New logic for calculating the value for the "Total Hours" card
-    let newValue;
+   let newValue;
     if (late < 3) {
         newValue = 0;
     } else if (late === 3) {
-        newValue = 1;
+        newValue = 0.5;
     } else if (late === 4) {
-        newValue = 3.5;
+        newValue = 0.5;
     } else if (late === 5) {
+        newValue = 1;
+    } else if (late === 6) {
+        newValue = 1.5;
+    } else if (late === 7) {
+        newValue = 2;
+    } else if (late === 8) {
+        newValue = 2.5;
+    } else if (late === 9) {
+        newValue = 3;
+    } else if (late === 10) {
+        newValue = 3.5;
+    } else if (late === 11) {
         newValue = 4;
+    } else if (late === 12) {
+        newValue = 4.5;
+    } else if (late === 13) {
+        newValue = 5;
+    } else if (late === 14) {
+        newValue = 5.5;
+    } else if (late === 15) {
+        newValue = 6;
+    } else if (late === 16) {
+        newValue = 6.5;
+    } else if (late === 17) {
+        newValue = 7;
+    } else if (late === 18) {
+        newValue = 7.5;
+    } else if (late === 19) {
+        newValue = 8;
+    } else if (late === 20) {
+        newValue = 8.5;
+    } else if (late === 21) {
+        newValue = 9;
+    } else if (late === 22) {
+        newValue = 9.5;
+    } else if (late === 23) {
+        newValue = 10;
+    } else if (late === 24) {
+        newValue = 10.5;
+    } else if (late === 25) {
+        newValue = 11;
+    } else if (late === 26) {
+        newValue = 11.5;
+    } else if (late === 27) {
+        newValue = 12;
+    } else if (late === 28) {
+        newValue = 12.5;
+    } else if (late === 29) {
+        newValue = 13;
+    } else if (late === 30) {
+        newValue = 13.5;
+    } else if (late === 31) {
+        newValue = 14;
     } else { // For 6 or more late logins
-        newValue = 4.5 + (late - 6) * 0.5;
+        newValue = "nan";
     }
 
     // Update the HTML cards with the new values
