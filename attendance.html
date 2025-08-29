@@ -318,7 +318,7 @@ function showAttendanceModal(details) {
 
     // Format the date for the modal header
     const userFriendlyDate = checkinDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    document.getElementById('modal-date').textContent = userFriendlyDate;
+    document.getElementById('modal-date').textContent = "";
 
     // Calculate total hours and minutes from the check-in and check-out times
     const totalMilliseconds = checkoutDate.getTime() - checkinDate.getTime();
