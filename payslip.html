@@ -1,266 +1,296 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Dashboard - Provisional Payslip</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .details-content { transition: max-height 0.3s ease-out; max-height: 0; overflow: hidden; }
-        .details-content.show { max-height: 500px; }
-        .accordion-btn svg { transition: transform 0.3s; }
-        .accordion-btn.open svg { transform: rotate(180deg); }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Employee Dashboard - Provisional Payslip</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .details-content { transition: max-height 0.3s ease-out; max-height: 0; overflow: hidden; }
+    .details-content.show { max-height: 500px; }
+    .accordion-btn svg { transition: transform 0.3s; }
+    .accordion-btn.open svg { transform: rotate(180deg); }
 
-        /* --- Scrolling Marquee Styles --- */
-        .marquee-container {
-            width: 100%;
-            overflow: hidden;
-            background-color: #1e3a8a; /* A dark blue */
-            color: white;
-            padding: 8px 0;
-        }
-        .marquee-text {
-            display: inline-block;
-            white-space: nowrap;
-            padding-left: 100%;
-            animation: scroll-left 25s linear infinite;
-        }
-        @keyframes scroll-left {
-            0% { transform: translateX(0%); }
-            100% { transform: translateX(-100%); }
-        }
+    /* --- Scrolling Marquee Styles --- */
+    .marquee-container {
+        width: 100%;
+        overflow: hidden;
+        background-color: #1e3a8a;
+        color: white;
+        padding: 8px 0;
+    }
+    .marquee-text {
+        display: inline-block;
+        white-space: nowrap;
+        padding-left: 100%;
+        animation: scroll-left 25s linear infinite;
+    }
+    @keyframes scroll-left {
+        0% { transform: translateX(0%); }
+        100% { transform: translateX(-100%); }
+    }
 
-        /* --- New Spinner Styles --- */
-        .spinner-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            text-align: center;
-            height: 100%;
-        }
+    /* --- Spinner Styles --- */
+    .spinner-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; }
+    .spinner-border { width: 3rem; height: 3rem; border: 0.25rem solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; color: #2563eb; }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-        .spinner-border {
-            width: 3rem;
-            height: 3rem;
-            border: 0.25rem solid currentColor;
-            border-right-color: transparent;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            color: #2563eb; /* A nice blue for the spinner */
-        }
+    /* --- Popup Styles --- */
+    .notice-popup {
+      position: fixed;
+      bottom: -100%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 90%;
+      max-width: 500px;
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      padding: 1.5rem;
+      text-align: center;
+      z-index: 50;
+      transition: bottom 0.6s ease-in-out;
+    }
+    .notice-popup.show { bottom: 50%; transform: translate(-50%, 50%); }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-    </style>
+    /* Blinking Icon */
+    .blink-icon {
+      animation: blink 1s infinite;
+      color: red;
+    }
+    @keyframes blink {
+      0%, 50%, 100% { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+  </style>
 </head>
 <body class="bg-slate-100 antialiased">
-    <header class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <h1 class="text-2xl font-bold text-slate-800">HR Ticket Hub</h1>
-            <div class="flex items-center gap-2">
-                <div id="userInfo" class="text-right"></div>
-                <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Tickets</a>
-                <a href="attendance.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Attendance</a>
-                <button id="change-password-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Change Password</button>
-                <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
-            </div>
-        </div>
-    </header>
-
-    <div class="marquee-container">
-        <p class="marquee-text font-semibold">
-            Important Announcement: Acknowledge Provisional Payslip by 1st Sept 2025, 4 PM. Queries via HR Ticket. Acknowledgment is mandatory for Management approval.
-        </p>
+  <header class="bg-white shadow-sm sticky top-0 z-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-slate-800">HR Ticket Hub</h1>
+      <div class="flex items-center gap-2">
+        <div id="userInfo" class="text-right"></div>
+        <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Tickets</a>
+        <a href="attendance.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Attendance</a>
+        <button id="change-password-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Change Password</button>
+        <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
+      </div>
     </div>
+  </header>
 
-    <main class="mt-8">
-        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <div id="payslip-container" class="bg-white rounded-xl shadow-lg p-8 md:p-10 hidden">
-                <div id="main-payslip-content"></div>
+  <div class="marquee-container">
+    <p class="marquee-text font-semibold">
+      Important Announcement: Acknowledge Provisional Payslip by <span style="font-weight: bold; color: rgb(255, 0, 140); background-color: aliceblue;">1st Sept 2025, 4 PM.</span> Queries via <span> HR Ticket.</span> Acknowledgment is mandatory for Management approval.
+    </p>
+  </div>
 
-                <div id="additional-details-section" class="mt-6 space-y-2">
-                    <div id="attendance-accordion" class="border rounded-lg overflow-hidden hidden">
-                        <button id="attendance-summary-btn" class="accordion-btn w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100">
-                            <span class="font-semibold text-slate-700">Attendance Summary</span>
-                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="details-content" id="attendance-summary-content">
-                            <div class="p-4 border-t" id="attendance-table-container"></div>
-                        </div>
-                    </div>
-                    <div id="loan-accordion" class="border rounded-lg overflow-hidden hidden">
-                        <button id="loan-details-btn" class="accordion-btn w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100">
-                            <span class="font-semibold text-slate-700">Loan Details</span>
-                            <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                        </button>
-                        <div class="details-content" id="loan-details-content">
-                            <div class="p-4 border-t" id="loan-table-container"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="acknowledgement-section" class="mt-8 pt-6 border-t">
-                    <div id="ack-area">
-                        <div class="flex items-center">
-                            <input id="ack-checkbox" type="checkbox" class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-                            <label for="ack-checkbox" class="ml-3 text-sm text-slate-700">Please note : Net Pay release is subject to Management approval</label>
-                        </div>
-                        <div id="ack-message" class="mt-3 text-sm font-semibold text-blue-800 p-3 bg-blue-50 rounded-lg hidden">I am accepting this payslip.</div>
-                        <button id="ack-submit-btn" class="mt-4 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Submit Acknowledgement</button>
-                    </div>
-                    <div id="already-acknowledged-msg" class="text-center p-4 bg-green-50 text-green-800 rounded-lg font-semibold hidden"></div>
-                </div>
+  <!-- 🔔 Blinking Notice Icon -->
+  <div id="notice-icon" class="fixed bottom-6 right-6 cursor-pointer z-50">
+    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 blink-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M12 19a7 7 0 110-14 7 7 0 010 14z"/>
+    </svg>
+  </div>
+
+  <!-- 📢 Important Notice Popup -->
+  <div id="notice-popup" class="notice-popup">
+    <h2 class="text-xl font-bold text-red-600 mb-3">Important Notice</h2>
+    <p class="text-slate-700 text-sm leading-relaxed">
+      If you have any queries, please raise a ticket on the HR portal.  
+      After generating the ticket, you may contact the HR team for assistance.  
+      If we do not receive your acknowledgment, your payslip will be considered correct and released accordingly.  
+      In certain cases, your salary may be kept on hold.  
+      Kindly review your Provisional Payslip carefully and provide your acknowledgment.
+    </p>
+    <button id="close-notice" class="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
+      Close
+    </button>
+  </div>
+
+  <main class="mt-8">
+    <!-- (Your full payslip content unchanged) -->
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
+      <div id="payslip-container" class="bg-white rounded-xl shadow-lg p-8 md:p-10 hidden">
+        <div id="main-payslip-content"></div>
+        <div id="additional-details-section" class="mt-6 space-y-2">
+          <div id="attendance-accordion" class="border rounded-lg overflow-hidden hidden">
+            <button id="attendance-summary-btn" class="accordion-btn w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100">
+              <span class="font-semibold text-slate-700">Attendance Summary</span>
+              <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="details-content" id="attendance-summary-content">
+              <div class="p-4 border-t" id="attendance-table-container"></div>
             </div>
-            
-            <div id="status-message" class="text-center py-20 bg-white rounded-xl shadow-lg">
-                <div class="spinner-container">
-                    <div class="spinner-border" role="status"></div>
-                    <p class="font-semibold text-slate-500 mt-4">Loading your latest Provisional Payslip...</p>
-                </div>
+          </div>
+          <div id="loan-accordion" class="border rounded-lg overflow-hidden hidden">
+            <button id="loan-details-btn" class="accordion-btn w-full flex justify-between items-center p-3 bg-slate-50 hover:bg-slate-100">
+              <span class="font-semibold text-slate-700">Loan Details</span>
+              <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+            </button>
+            <div class="details-content" id="loan-details-content">
+              <div class="p-4 border-t" id="loan-table-container"></div>
             </div>
+          </div>
         </div>
-    </main>
-    
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // Your URL
-        let currentUser = null;
-        let currentPayslipPeriod = null;
+        <div id="acknowledgement-section" class="mt-8 pt-6 border-t">
+          <div id="ack-area">
+            <div class="flex items-center">
+              <input id="ack-checkbox" type="checkbox" class="h-5 w-5 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <label for="ack-checkbox" class="ml-3 text-sm text-slate-700">Please note : Net Pay release is subject to Management approval</label>
+            </div>
+            <div id="ack-message" class="mt-3 text-sm font-semibold text-blue-800 p-3 bg-blue-50 rounded-lg hidden">I am accepting this payslip.</div>
+            <button id="ack-submit-btn" class="mt-4 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-slate-400 disabled:cursor-not-allowed" disabled>Submit Acknowledgement</button>
+          </div>
+          <div id="already-acknowledged-msg" class="text-center p-4 bg-green-50 text-green-800 rounded-lg font-semibold hidden"></div>
+        </div>
+      </div>
+      <div id="status-message" class="text-center py-20 bg-white rounded-xl shadow-lg">
+        <div class="spinner-container">
+          <div class="spinner-border" role="status"></div>
+          <p class="font-semibold text-slate-500 mt-4">Loading your latest Provisional Payslip...</p>
+        </div>
+      </div>
+    </div>
+  </main>
 
-        document.addEventListener('DOMContentLoaded', () => {
-            currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            if (!currentUser) { window.location.href = 'index.html'; return; }
-            document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
-            fetchAndDisplayLatestPayslip();
-            setupEventListeners();
+  <script>
+    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; 
+    let currentUser = null;
+    let currentPayslipPeriod = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+      if (!currentUser) { window.location.href = 'index.html'; return; }
+      document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
+      fetchAndDisplayLatestPayslip();
+      setupEventListeners();
+
+      // Show popup after 2s
+      setTimeout(() => { document.getElementById('notice-popup').classList.add('show'); }, 2000);
+    });
+
+    // Notice popup logic
+    document.getElementById('notice-icon').addEventListener('click', () => {
+      document.getElementById('notice-popup').classList.add('show');
+    });
+    document.getElementById('close-notice').addEventListener('click', () => {
+      document.getElementById('notice-popup').classList.remove('show');
+    });
+
+    async function fetchAndDisplayLatestPayslip() {
+      const container = document.getElementById('payslip-container');
+      const statusMessage = document.getElementById('status-message');
+      const spinnerContainer = statusMessage.querySelector('.spinner-container');
+      statusMessage.classList.remove('hidden');
+      container.classList.add('hidden');
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'getLatestPayslip', userId: currentUser.userId }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
         });
-
-        async function fetchAndDisplayLatestPayslip() {
-            const container = document.getElementById('payslip-container');
-            const statusMessage = document.getElementById('status-message');
-            const spinnerContainer = statusMessage.querySelector('.spinner-container');
-            
-            // Show the spinner and hide the container initially
-            statusMessage.classList.remove('hidden');
-            container.classList.add('hidden');
-            
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getLatestPayslip', userId: currentUser.userId }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await res.json();
-                
-                if (result.status === 'success' && result.data.payslip) {
-                    displayPayslip(result.data.payslip, result.data.attendance, result.data.loan, result.data.acknowledgement);
-                    container.classList.remove('hidden');
-                    statusMessage.classList.add('hidden');
-                } else {
-                    spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">${result.message || 'Payslip data not found.'}</p>`;
-                }
-            } catch (error) {
-                spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">Connection error. Please try again.</p>`;
-            }
+        const result = await res.json();
+        if (result.status === 'success' && result.data.payslip) {
+          displayPayslip(result.data.payslip, result.data.attendance, result.data.loan, result.data.acknowledgement);
+          container.classList.remove('hidden');
+          statusMessage.classList.add('hidden');
+        } else {
+          spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">${result.message || 'Payslip data not found.'}</p>`;
         }
+      } catch (error) {
+        spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">Connection error. Please try again.</p>`;
+      }
+    }
 
-        function displayPayslip(payslipData, attendanceData, loanData, ackDate) {
-            currentPayslipPeriod = payslipData.PayPeriod;
-            const mainContent = document.getElementById('main-payslip-content');
-            
-            const payDate = payslipData.PayDate ? new Date(payslipData.PayDate).toLocaleDateString('en-GB') : 'N/A';
-            const earningsComponents = ['BasicSalary', 'HRA', 'SpecialAllowance', 'Bonus', 'Overtime','ESIC','Arrear','Incentive'];
-            const deductionsComponents = ['IncomeTax', 'ProvidentFund', 'ProfessionalTax', 'Loan', 'LateLogin', 'OtherDeduction', 'ESIC'];
-            let earningsHtml = ''; let deductionsHtml = '';
+    function displayPayslip(payslipData, attendanceData, loanData, ackDate) {
+      currentPayslipPeriod = payslipData.PayPeriod;
+      const mainContent = document.getElementById('main-payslip-content');
+      const payDate = payslipData.PayDate ? new Date(payslipData.PayDate).toLocaleDateString('en-GB') : 'N/A';
+      const earningsComponents = ['BasicSalary', 'HRA', 'SpecialAllowance', 'Bonus', 'Overtime','ESIC','Arrear','Incentive'];
+      const deductionsComponents = ['IncomeTax', 'ProvidentFund', 'ProfessionalTax', 'Loan', 'Late Login Deduction', 'OtherDeduction', 'ESIC'];
+      let earningsHtml = ''; let deductionsHtml = '';
+      earningsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { earningsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
+      deductionsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { deductionsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
+      mainContent.innerHTML = `<div class="flex justify-between items-start border-b pb-4 mb-6"><div><h3 class="text-2xl font-bold text-slate-800"></h3><p class="text-slate-500"></p></div><div><h4 class="text-xl font-semibold text-slate-700 text-right">Provisional Payslip</h4><p class="text-slate-500 text-right">${formatPeriodForDisplay(payslipData.PayPeriod)}</p></div></div><div class="grid grid-cols-2 gap-x-8 gap-y-2 mb-8 text-sm"><div><span class="font-semibold text-slate-600">Employee Name:</span> <span class="text-slate-800">${currentUser.fullName}</span></div><div><span class="font-semibold text-slate-600">Employee ID:</span> <span class="text-slate-800">${payslipData.UserID}</span></div><div><span class="font-semibold text-slate-600">Pay Date:</span> <span class="text-slate-800">${payDate}</span></div></div><div class="grid md:grid-cols-2 gap-8"><div class="space-y-2"><h5 class="text-lg font-bold text-green-700 mb-2">Earnings</h5><table class="w-full text-sm"><tbody>${earningsHtml}</tbody><tfoot class="font-bold border-t-2 border-slate-300"><tr><td class="py-2">Gross Earnings</td><td class="text-right py-2">${formatCurrency(payslipData.GrossEarnings)}</td></tr></tfoot></table></div><div class="space-y-2"><h5 class="text-lg font-bold text-red-700 mb-2">Deductions</h5><table class="w-full text-sm"><tbody>${deductionsHtml}</tbody><tfoot class="font-bold border-t-2 border-slate-300"><tr><td class="py-2">Total Deductions</td><td class="text-right py-2">${formatCurrency(payslipData.TotalDeductions)}</td></tr></tfoot></table></div></div><div class="mt-8 pt-4 border-t-2 border-slate-400 bg-slate-50 p-4 rounded-lg flex justify-between items-center"><h5 class="text-xl font-bold text-slate-800">Net Pay</h5><p class="text-2xl font-extrabold text-blue-700">₹ ${formatCurrency(payslipData.NetPay)}</p></div>`;
+      if(attendanceData) {
+        document.getElementById('attendance-table-container').innerHTML = createDetailTable(attendanceData);
+        document.getElementById('attendance-accordion').classList.remove('hidden');
+      }
+      if(loanData) {
+        document.getElementById('loan-table-container').innerHTML = createDetailTable(loanData);
+        document.getElementById('loan-accordion').classList.remove('hidden');
+      }
+      const ackArea = document.getElementById('ack-area');
+      const alreadyAckMsg = document.getElementById('already-acknowledged-msg');
+      if (ackDate) {
+        alreadyAckMsg.textContent = `Payslip acknowledged on ${new Date(ackDate).toLocaleString()}.`;
+        alreadyAckMsg.classList.remove('hidden');
+        ackArea.classList.add('hidden');
+      } else {
+        alreadyAckMsg.classList.add('hidden');
+        ackArea.classList.remove('hidden');
+      }
+    }
 
-            earningsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { earningsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
-            deductionsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { deductionsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
-            
-            mainContent.innerHTML = `<div class="flex justify-between items-start border-b pb-4 mb-6"><div><h3 class="text-2xl font-bold text-slate-800"></h3><p class="text-slate-500"></p></div><div><h4 class="text-xl font-semibold text-slate-700 text-right">Provisional Payslip</h4><p class="text-slate-500 text-right">${formatPeriodForDisplay(payslipData.PayPeriod)}</p></div></div><div class="grid grid-cols-2 gap-x-8 gap-y-2 mb-8 text-sm"><div><span class="font-semibold text-slate-600">Employee Name:</span> <span class="text-slate-800">${currentUser.fullName}</span></div><div><span class="font-semibold text-slate-600">Employee ID:</span> <span class="text-slate-800">${payslipData.UserID}</span></div><div><span class="font-semibold text-slate-600">Pay Date:</span> <span class="text-slate-800">${payDate}</span></div></div><div class="grid md:grid-cols-2 gap-8"><div class="space-y-2"><h5 class="text-lg font-bold text-green-700 mb-2">Earnings</h5><table class="w-full text-sm"><tbody>${earningsHtml}</tbody><tfoot class="font-bold border-t-2 border-slate-300"><tr><td class="py-2">Gross Earnings</td><td class="text-right py-2">${formatCurrency(payslipData.GrossEarnings)}</td></tr></tfoot></table></div><div class="space-y-2"><h5 class="text-lg font-bold text-red-700 mb-2">Deductions</h5><table class="w-full text-sm"><tbody>${deductionsHtml}</tbody><tfoot class="font-bold border-t-2 border-slate-300"><tr><td class="py-2">Total Deductions</td><td class="text-right py-2">${formatCurrency(payslipData.TotalDeductions)}</td></tr></tfoot></table></div></div><div class="mt-8 pt-4 border-t-2 border-slate-400 bg-slate-50 p-4 rounded-lg flex justify-between items-center"><h5 class="text-xl font-bold text-slate-800">Net Pay</h5><p class="text-2xl font-extrabold text-blue-700">₹ ${formatCurrency(payslipData.NetPay)}</p></div>`;
-
-            if(attendanceData) {
-                document.getElementById('attendance-table-container').innerHTML = createDetailTable(attendanceData);
-                document.getElementById('attendance-accordion').classList.remove('hidden');
-            }
-            if(loanData) {
-                document.getElementById('loan-table-container').innerHTML = createDetailTable(loanData);
-                document.getElementById('loan-accordion').classList.remove('hidden');
-            }
-            
-            const ackArea = document.getElementById('ack-area');
-            const alreadyAckMsg = document.getElementById('already-acknowledged-msg');
-            if (ackDate) {
-                alreadyAckMsg.textContent = `Payslip acknowledged on ${new Date(ackDate).toLocaleString()}.`;
-                alreadyAckMsg.classList.remove('hidden');
-                ackArea.classList.add('hidden');
-            } else {
-                alreadyAckMsg.classList.add('hidden');
-                ackArea.classList.remove('hidden');
-            }
+    function createDetailTable(data) {
+      let tableHtml = '<table class="w-full text-sm">';
+      for (const key in data) {
+        if (key !== 'UserID' && key !== 'PayPeriod' && data[key] !== null && data[key] !== "") {
+          tableHtml += `<tr><td class="py-1.5 text-slate-600 font-semibold">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right text-slate-800">${data[key]}</td></tr>`;
         }
+      }
+      return tableHtml + '</table>';
+    }
 
-        function createDetailTable(data) {
-            let tableHtml = '<table class="w-full text-sm">';
-            for (const key in data) {
-                if (key !== 'UserID' && key !== 'PayPeriod' && data[key] !== null && data[key] !== "") {
-                     tableHtml += `<tr><td class="py-1.5 text-slate-600 font-semibold">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right text-slate-800">${data[key]}</td></tr>`;
-                }
-            }
-            return tableHtml + '</table>';
-        }
-        
-        function formatPeriodForDisplay(period) { if(!period) return ''; const [y, m] = period.split('-'); return new Date(y, m - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
-        function formatCurrency(value) { const n = parseFloat(value); return isNaN(n) ? '0.00' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+    function formatPeriodForDisplay(period) { if(!period) return ''; const [y, m] = period.split('-'); return new Date(y, m - 1, 1).toLocaleString('default', { month: 'long', year: 'numeric' }); }
+    function formatCurrency(value) { const n = parseFloat(value); return isNaN(n) ? '0.00' : n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
 
-        async function handleAcknowledgementSubmit() {
-            const btn = document.getElementById('ack-submit-btn');
-            btn.disabled = true;
-            btn.textContent = 'Submitting...';
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'acknowledgePayslip', userId: currentUser.userId, payPeriod: currentPayslipPeriod }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    document.getElementById('ack-area').classList.add('hidden');
-                    const msgDiv = document.getElementById('already-acknowledged-msg');
-                    msgDiv.textContent = 'Thank you! Your acknowledgement has been recorded.';
-                    msgDiv.classList.remove('hidden');
-                } else {
-                     alert(`Error: ${result.message}`);
-                     btn.disabled = false;
-                     btn.textContent = 'Submit Acknowledgement';
-                }
-            } catch (error) {
-                alert('Connection error. Please try again.');
-                btn.disabled = false;
-                btn.textContent = 'Submit Acknowledgement';
-            }
+    async function handleAcknowledgementSubmit() {
+      const btn = document.getElementById('ack-submit-btn');
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      try {
+        const res = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          body: JSON.stringify({ action: 'acknowledgePayslip', userId: currentUser.userId, payPeriod: currentPayslipPeriod }),
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+        });
+        const result = await res.json();
+        if (result.status === 'success') {
+          document.getElementById('ack-area').classList.add('hidden');
+          const msgDiv = document.getElementById('already-acknowledged-msg');
+          msgDiv.textContent = 'Thank you! Your acknowledgement has been recorded.';
+          msgDiv.classList.remove('hidden');
+        } else {
+          alert(`Error: ${result.message}`);
+          btn.disabled = false;
+          btn.textContent = 'Submit Acknowledgement';
         }
+      } catch (error) {
+        alert('Connection error. Please try again.');
+        btn.disabled = false;
+        btn.textContent = 'Submit Acknowledgement';
+      }
+    }
 
-        function setupEventListeners() {
-            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
-            document.getElementById('change-password-btn').addEventListener('click', () => { alert("Password modal goes here."); });
-            document.getElementById('attendance-summary-btn').addEventListener('click', (e) => { e.currentTarget.classList.toggle('open'); document.getElementById('attendance-summary-content').classList.toggle('show'); });
-            document.getElementById('loan-details-btn').addEventListener('click', (e) => { e.currentTarget.classList.toggle('open'); document.getElementById('loan-details-content').classList.toggle('show'); });
-            
-            const ackCheckbox = document.getElementById('ack-checkbox');
-            ackCheckbox.addEventListener('change', () => {
-                const ackSubmitBtn = document.getElementById('ack-submit-btn');
-                const ackMessage = document.getElementById('ack-message');
-                if (ackCheckbox.checked) {
-                    ackSubmitBtn.disabled = false;
-                    ackMessage.classList.remove('hidden');
-                } else {
-                    ackSubmitBtn.disabled = true;
-                    ackMessage.classList.add('hidden');
-                }
-            });
-            document.getElementById('ack-submit-btn').addEventListener('click', handleAcknowledgementSubmit);
+    function setupEventListeners() {
+      document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+      document.getElementById('change-password-btn').addEventListener('click', () => { alert("Password modal goes here."); });
+      document.getElementById('attendance-summary-btn').addEventListener('click', (e) => { e.currentTarget.classList.toggle('open'); document.getElementById('attendance-summary-content').classList.toggle('show'); });
+      document.getElementById('loan-details-btn').addEventListener('click', (e) => { e.currentTarget.classList.toggle('open'); document.getElementById('loan-details-content').classList.toggle('show'); });
+      const ackCheckbox = document.getElementById('ack-checkbox');
+      ackCheckbox.addEventListener('change', () => {
+        const ackSubmitBtn = document.getElementById('ack-submit-btn');
+        const ackMessage = document.getElementById('ack-message');
+        if (ackCheckbox.checked) {
+          ackSubmitBtn.disabled = false;
+          ackMessage.classList.remove('hidden');
+        } else {
+          ackSubmitBtn.disabled = true;
+          ackMessage.classList.add('hidden');
         }
-    </script>
+      });
+      document.getElementById('ack-submit-btn').addEventListener('click', handleAcknowledgementSubmit);
+    }
+  </script>
 </body>
 </html>
