@@ -29,6 +29,30 @@
             0% { transform: translateX(0%); }
             100% { transform: translateX(-100%); }
         }
+
+        /* --- New Spinner Styles --- */
+        .spinner-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            height: 100%;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border: 0.25rem solid currentColor;
+            border-right-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            color: #2563eb; /* A nice blue for the spinner */
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-100 antialiased">
@@ -39,7 +63,6 @@
                 <div id="userInfo" class="text-right"></div>
                 <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Tickets</a>
                 <a href="attendance.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Attendance</a>
-                <!-- <button class="py-2 px-4 text-sm font-medium rounded-lg text-blue-600 bg-blue-100 border border-blue-300">Provisional Payslip</button> -->
                 <button id="change-password-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Change Password</button>
                 <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
             </div>
@@ -54,11 +77,6 @@
 
     <main class="mt-8">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
-            <!-- <div class="mb-6">
-                <h2 class="text-3xl font-bold text-slate-900">My Payslip</h2>
-                <p class="text-slate-500 mt-1">Showing your latest available payslip.</p>
-            </div> -->
-
             <div id="payslip-container" class="bg-white rounded-xl shadow-lg p-8 md:p-10 hidden">
                 <div id="main-payslip-content"></div>
 
@@ -97,7 +115,10 @@
             </div>
             
             <div id="status-message" class="text-center py-20 bg-white rounded-xl shadow-lg">
-                <p class="font-semibold text-slate-500">Loading your latest Provisional Payslip...</p>
+                <div class="spinner-container">
+                    <div class="spinner-border" role="status"></div>
+                    <p class="font-semibold text-slate-500 mt-4">Loading your latest Provisional Payslip...</p>
+                </div>
             </div>
         </div>
     </main>
@@ -118,6 +139,12 @@
         async function fetchAndDisplayLatestPayslip() {
             const container = document.getElementById('payslip-container');
             const statusMessage = document.getElementById('status-message');
+            const spinnerContainer = statusMessage.querySelector('.spinner-container');
+            
+            // Show the spinner and hide the container initially
+            statusMessage.classList.remove('hidden');
+            container.classList.add('hidden');
+            
             try {
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
@@ -125,15 +152,16 @@
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await res.json();
+                
                 if (result.status === 'success' && result.data.payslip) {
                     displayPayslip(result.data.payslip, result.data.attendance, result.data.loan, result.data.acknowledgement);
-                    statusMessage.classList.add('hidden');
                     container.classList.remove('hidden');
+                    statusMessage.classList.add('hidden');
                 } else {
-                    statusMessage.innerHTML = `<p class="font-semibold text-red-500">${result.message || 'Payslip data not found.'}</p>`;
+                    spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">${result.message || 'Payslip data not found.'}</p>`;
                 }
             } catch (error) {
-                statusMessage.innerHTML = `<p class="font-semibold text-red-500">Connection error. Please try again.</p>`;
+                spinnerContainer.innerHTML = `<p class="font-semibold text-red-500">Connection error. Please try again.</p>`;
             }
         }
 
