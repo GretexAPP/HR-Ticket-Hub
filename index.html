@@ -17,173 +17,228 @@
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
     }
+
+    /* Hacking text effect */
+    .typing-text {
+      overflow: hidden;
+      white-space: nowrap;
+      letter-spacing: .15em;
+      border-right: .15em solid white; /* Simulates the caret */
+      animation:
+        typing 2s steps(30, end) forwards,
+        blink-caret .75s step-end infinite;
+    }
+    @keyframes typing {
+      from { width: 0 }
+      to { width: 100% }
+    }
+    @keyframes blink-caret {
+      from, to { border-color: transparent }
+      50% { border-color: white }
+    }
   </style>
 </head>
 <body class="h-screen flex items-center justify-center">
 
-  <!-- Container -->
-  <div class="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-stretch shadow-2xl rounded-3xl overflow-hidden">
+    <marquee behavior="scroll" direction="left" class="fixed top-0 left-0 w-full bg-red-600 text-white p-2 font-semibold z-50">
+        Important Notice: Your provisional payslip will be uploaded shortly. We have already uploaded your attendance on the portal; please review it. If you require any corrections, feel free to reach out to the HR team.
+    </marquee>
 
-    <!-- Left Section -->
-    <div class="hidden lg:flex w-1/2 bg-black/30 backdrop-blur-md flex-col justify-center items-center text-white p-12 relative">
-      <img src="logo-1.gif" alt="Logo" class="w-32 h-32 mb-6 animate-bounce"/>
-      <h1 class="text-5xl font-extrabold tracking-tight">HR Hub</h1>
-      <p class="mt-6 text-lg text-blue-100 max-w-md text-center leading-relaxed">
-        A secure space to manage HR requests, tickets, and approvals effortlessly.  
-        Sign in to access your personalized dashboard.
-      </p>
+    <div id="loading-screen" class="fixed inset-0 bg-black flex flex-col justify-center items-center text-green-400 font-mono text-lg z-50">
+      <p class="typing-text">Initializing HR Hub protocol...</p>
     </div>
 
-    <!-- Right Section (Login Card) -->
-    <div class="flex-1 flex justify-center items-center bg-white/20 backdrop-blur-lg p-10">
-      <div class="w-full max-w-md bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl border border-slate-200 p-10 transition hover:scale-[1.02] duration-300">
-        
-        <!-- Welcome -->
-        <div class="mb-8 text-center">
-          <h4 class="text-3xl font-bold text-slate-800">Welcome Back 👋</h4>
-          <a href="help.html" class="mt-2 block text-slate-500 hover:text-blue-600 transition">Help / Notes</a>
+    <div id="login-container" class="w-full max-w-6xl flex flex-col lg:flex-row items-center lg:items-stretch shadow-2xl rounded-3xl overflow-hidden hidden">
+
+        <div class="hidden lg:flex w-1/2 bg-black/30 backdrop-blur-md flex-col justify-center items-center text-white p-12 relative">
+          <img src="logo-1.gif" alt="Logo" class="w-32 h-32 mb-6 animate-bounce"/>
+          <h1 class="text-5xl font-extrabold tracking-tight">HR Hub</h1>
+          <p class="mt-6 text-lg text-blue-100 max-w-md text-center leading-relaxed">
+            A secure space to manage HR requests, tickets, and approvals effortlessly.
+            Sign in to access your personalized dashboard.
+          </p>
         </div>
 
-        <!-- Login Form -->
-        <form id="loginForm" class="space-y-6">
-          <div>
-            <label for="userId" class="block text-sm font-semibold text-slate-700">User ID</label>
-            <input id="userId" name="userId" type="text" required
-              class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"/>
-          </div>
+        <div class="flex-1 flex justify-center items-center bg-white/20 backdrop-blur-lg p-10">
+          <div class="w-full max-w-md bg-white/80 backdrop-blur-lg shadow-xl rounded-2xl border border-slate-200 p-10 transition hover:scale-[1.02] duration-300">
 
-          <div>
-            <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
-            <input id="password" name="password" type="password" required
-              class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"/>
-          </div>
+                <div class="mb-8 text-center">
+                  <h4 class="text-3xl font-bold text-slate-800">Welcome Back 👋</h4>
+                  <a href="help.html" class="mt-2 block text-slate-500 hover:text-blue-600 transition">Help / Notes</a>
+                </div>
 
-          <button type="submit" id="loginButton"
-            class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold shadow hover:from-blue-700 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
-            Sign In
-          </button>
-          <p id="errorMessage" class="text-center text-red-600 font-semibold mt-3"></p>
+                <form id="loginForm" class="space-y-6">
+                  <div>
+                    <label for="userId" class="block text-sm font-semibold text-slate-700">User ID</label>
+                    <input id="userId" name="userId" type="text" required
+                      class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"/>
+                  </div>
+
+                  <div>
+                    <label for="password" class="block text-sm font-semibold text-slate-700">Password</label>
+                    <input id="password" name="password" type="password" required
+                      class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"/>
+                  </div>
+
+                  <button type="submit" id="loginButton"
+                    class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold shadow hover:from-blue-700 hover:to-indigo-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition">
+                    Sign In
+                  </button>
+                  <p id="errorMessage" class="text-center text-red-600 font-semibold mt-3" aria-live="polite"></p>
+                </form>
+
+                <div class="mt-6 text-center text-sm">
+                  <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:underline">Forgot Password?</a>
+                </div>
+          </div>
+        </div>
+    </div>
+
+    <div id="reset-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center z-50">
+      <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-10">
+        <div class="mb-6 text-center">
+          <h4 class="text-3xl font-bold text-slate-800">Forgot Password?</h4>
+          <p class="mt-2 text-slate-500">Enter your email and we'll send you a temporary password.</p>
+        </div>
+        <form id="resetForm" class="space-y-6">
+          <div>
+            <label for="reset-email" class="block text-sm font-semibold text-slate-700">Email Address</label>
+            <input id="reset-email" name="email" type="email" required class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"/>
+          </div>
+          <button type="submit" id="resetButton" class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold shadow hover:from-blue-700 hover:to-indigo-600">Send Reset Email</button>
+          <p id="resetMessage" class="text-center font-semibold mt-3" aria-live="polite"></p>
         </form>
-
         <div class="mt-6 text-center text-sm">
-          <a href="#" id="forgotPasswordLink" class="text-blue-600 hover:underline">Forgot Password?</a>
+          <a href="#" id="backToLoginLink" class="text-blue-600 hover:underline">Back to Sign In</a>
         </div>
       </div>
     </div>
-  </div>
-
-  <!-- Reset Password Modal -->
-  <div id="reset-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-70 flex justify-center items-center z-50">
-    <div class="w-full max-w-md bg-white shadow-2xl rounded-2xl p-10">
-      <div class="mb-6 text-center">
-        <h4 class="text-3xl font-bold text-slate-800">Forgot Password?</h4>
-        <p class="mt-2 text-slate-500">Enter your email and we'll send you a temporary password.</p>
-      </div>
-      <form id="resetForm" class="space-y-6">
-        <div>
-          <label for="reset-email" class="block text-sm font-semibold text-slate-700">Email Address</label>
-          <input id="reset-email" name="email" type="email" required class="mt-2 w-full px-4 h-11 border border-slate-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500"/>
-        </div>
-        <button type="submit" id="resetButton" class="w-full py-3 px-4 rounded-lg bg-gradient-to-r from-blue-600 to-indigo-500 text-white font-semibold shadow hover:from-blue-700 hover:to-indigo-600">Send Reset Email</button>
-        <p id="resetMessage" class="text-center font-semibold mt-3"></p>
-      </form>
-      <div class="mt-6 text-center text-sm">
-        <a href="#" id="backToLoginLink" class="text-blue-600 hover:underline">Back to Sign In</a>
-      </div>
-    </div>
-  </div>
 
   <script>
-    const loginForm = document.getElementById('loginForm');
-    const errorMessage = document.getElementById('errorMessage');
-    const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec';
-
-    // Reset Modal Elements
-    const resetModal = document.getElementById('reset-modal');
-    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
-    const backToLoginLink = document.getElementById('backToLoginLink');
-    const resetForm = document.getElementById('resetForm');
-    const resetMessage = document.getElementById('resetMessage');
-    
-    // Login Form Logic
-    loginForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      errorMessage.textContent = '';
+    document.addEventListener('DOMContentLoaded', () => {
+      // --- Constants and Element Selections ---
+      const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec';
+      
+      const loadingScreen = document.getElementById('loading-screen');
+      const loginContainer = document.getElementById('login-container');
+      
+      const loginForm = document.getElementById('loginForm');
       const loginButton = document.getElementById('loginButton');
-      loginButton.disabled = true;
-      loginButton.textContent = 'Signing In...';
+      const errorMessage = document.getElementById('errorMessage');
 
-      const userId = document.getElementById('userId').value;
-      const password = document.getElementById('password').value;
+      const resetModal = document.getElementById('reset-modal');
+      const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+      const backToLoginLink = document.getElementById('backToLoginLink');
+      const resetForm = document.getElementById('resetForm');
+      const resetButton = document.getElementById('resetButton');
+      const resetMessage = document.getElementById('resetMessage');
 
-      try {
-        const response = await fetch(WEB_APP_URL, {
-          method: 'POST',
-          body: JSON.stringify({ action: 'login', userId, password }),
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        });
+      // --- Initial Page Load Logic ---
+      setTimeout(() => {
+        loadingScreen.classList.add('hidden');
+        loginContainer.classList.remove('hidden');
+      }, 2000); // 2-second delay for the loading animation
 
-        const result = await response.json();
+      // --- Event Listeners ---
 
-        if (result.status === 'success') {
-          sessionStorage.setItem('loggedInUser', JSON.stringify(result.user));
-          const userRole = result.user.role;
-          switch (userRole) {
-            case 'EMP': window.location.href = 'employee.html'; break;
-            case 'Admin': window.location.href = 'admin.html'; break;
-            case 'HR': window.location.href = 'hr.html'; break;
-            case 'Super Admin': window.location.href = 'superadmin_dashboard.html'; break;
-            default: errorMessage.textContent = 'Unknown user role. Cannot redirect.';
-          }
-        } else {
-          errorMessage.textContent = result.message;
-        }
-      } catch (error) {
-        errorMessage.textContent = 'An error occurred. Please try again.';
-      } finally {
-        loginButton.disabled = false;
-        loginButton.textContent = 'Sign In';
-      }
-    });
-
-    // Reset Modal Events
-    forgotPasswordLink.addEventListener('click', (e) => {
+      // Login Form Submission
+      loginForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        resetModal.classList.remove('hidden');
-    });
+        errorMessage.textContent = '';
+        loginButton.disabled = true;
+        loginButton.textContent = 'Signing In...';
 
-    backToLoginLink.addEventListener('click', (e) => {
-        e.preventDefault();
-        resetModal.classList.add('hidden');
-        resetMessage.textContent = '';
-        resetForm.reset();
-    });
-    
-    resetForm.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        resetMessage.textContent = '';
-        const resetButton = document.getElementById('resetButton');
-        resetButton.disabled = true;
-        resetButton.textContent = 'Sending...';
-
-        const email = document.getElementById('reset-email').value;
+        const userId = document.getElementById('userId').value;
+        const password = document.getElementById('password').value;
 
         try {
-            const response = await fetch(WEB_APP_URL, {
-                method: 'POST',
-                body: JSON.stringify({ action: 'resetPassword', email }),
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-            });
-            await response.json();
-            resetMessage.textContent = "If an account with this email exists, password reset instructions have been sent.";
-            resetMessage.className = 'text-center font-semibold text-green-600 mt-3';
+          const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            // Note: The 'text/plain' content type is specific to how some Google Apps Scripts are set up.
+            // It requires the backend to parse the stringified JSON from the request body.
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify({ action: 'login', userId, password }),
+          });
+
+          if (!response.ok) {
+            throw new Error(`Network response was not ok. Status: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result.status === 'success') {
+            sessionStorage.setItem('loggedInUser', JSON.stringify(result.user));
+            const userRole = result.user.role;
+            switch (userRole) {
+              case 'EMP': window.location.href = 'employee.html'; break;
+              case 'Admin': window.location.href = 'admin.html'; break;
+              case 'HR': window.location.href = 'hr.html'; break;
+              case 'Super Admin': window.location.href = 'superadmin_dashboard.html'; break;
+              default: errorMessage.textContent = 'Unknown user role. Cannot redirect.';
+            }
+          } else {
+            errorMessage.textContent = result.message || 'Invalid User ID or Password.';
+          }
         } catch (error) {
-            resetMessage.textContent = "An error occurred. Please try again.";
-            resetMessage.className = 'text-center font-semibold text-red-600 mt-3';
+          console.error('Login Error:', error);
+          errorMessage.textContent = 'An error occurred. Please try again later.';
         } finally {
-            resetButton.disabled = false;
-            resetButton.textContent = 'Send Reset Email';
+          loginButton.disabled = false;
+          loginButton.textContent = 'Sign In';
         }
+      });
+
+      // Show Password Reset Modal
+      forgotPasswordLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          resetModal.classList.remove('hidden');
+      });
+
+      // Hide Password Reset Modal
+      backToLoginLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          resetModal.classList.add('hidden');
+          resetMessage.textContent = '';
+          resetMessage.classList.remove('text-green-600', 'text-red-600');
+          resetForm.reset();
+      });
+      
+      // Password Reset Form Submission
+      resetForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          resetMessage.textContent = '';
+          resetMessage.classList.remove('text-green-600', 'text-red-600');
+          resetButton.disabled = true;
+          resetButton.textContent = 'Sending...';
+
+          const email = document.getElementById('reset-email').value;
+
+          try {
+              const response = await fetch(WEB_APP_URL, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                  body: JSON.stringify({ action: 'resetPassword', email }),
+              });
+
+              if (!response.ok) {
+                // We don't reveal the server error to the user for security.
+                throw new Error('Server returned an error.');
+              }
+              
+              // We show a generic success message to prevent email enumeration attacks.
+              resetMessage.textContent = "If an account with this email exists, password reset instructions have been sent.";
+              resetMessage.classList.add('text-green-600');
+
+          } catch (error) {
+              console.error('Password Reset Error:', error);
+              // Display a generic message on failure as well.
+              resetMessage.textContent = "Could not process request. Please try again later.";
+              resetMessage.classList.add('text-red-600');
+          } finally {
+              resetButton.disabled = false;
+              resetButton.textContent = 'Send Reset Email';
+          }
+      });
     });
   </script>
 </body>
