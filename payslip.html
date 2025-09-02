@@ -31,7 +31,7 @@
     }
 
     /* --- Spinner Styles --- */
-    .spinner-container { display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; height: 100%; }
+    .spinner-container { display: flex; flex-direction: column; align-items-center; justify-content: center; text-align: center; height: 100%; }
     .spinner-border { width: 3rem; height: 3rem; border: 0.25rem solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; color: #2563eb; }
     @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -67,8 +67,9 @@
 <body class="bg-slate-100 antialiased">
   <header class="bg-white shadow-sm sticky top-0 z-20">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-      <img class="h-10" src="logo-1.gif" alt="Logo">
-<!--       <h1 class="text-2xl font-bold text-slate-800">HR Hub</h1> -->
+      
+      <h1 class="text-2xl font-bold text-slate-800">HR Hub</h1>
+       
       <div class="flex items-center gap-2">
         <div id="userInfo" class="text-right"></div>
         <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Tickets</a>
@@ -81,8 +82,7 @@
 
   <div class="marquee-container">
     <p class="marquee-text font-semibold">
-      Important Announcement:We will Uplode your Provisional Payslip soon
-<!--       Important Announcement: Acknowledge Provisional Payslip by <span style="font-weight: bold; color: rgb(255, 0, 140); background-color: aliceblue;">1st Sept 2025, 4 PM.</span> Queries via <span> HR Ticket.</span> Acknowledgment is mandatory for Management approval. -->
+      Important Announcement: Acknowledge Provisional Payslip by <span style="font-weight: bold; color: rgb(255, 0, 140); background-color: aliceblue;">1st Sept 2025, 4 PM.</span> Queries via <a href="employee.html">HR Portal</a> Acknowledgment is mandatory for Management approval.
     </p>
   </div>
 
@@ -102,7 +102,6 @@
       <strong>If we do not receive your acknowledgment, your payslip will be considered correct and released accordingly. 
       In certain cases, your salary may be kept on <span style="color: red;">hold</span>.</strong>
       Kindly review your Provisional Payslip carefully and provide your acknowledgment.
-      <strong>We will uplode you Provisional Payslip soon</strong>
     </p>
     <button id="close-notice" class="mt-4 px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow">
       Close
@@ -110,6 +109,23 @@
   </div>
 
   <main class="mt-8">
+    <!-- IT Requirement Section -->
+    <div id="it-req-section" class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-lg font-bold text-slate-800 mb-2">IT Requirement: Desktop and Download Folder Cleanup</h2>
+            <p class="text-sm text-slate-600 mb-4">As per IT policy, please upload a screenshot confirming that your desktop and download folders have been cleared.</p>
+            <div class="flex items-center mb-4">
+                <input id="it-req-checkbox" type="checkbox" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                <label for="it-req-checkbox" class="ml-2 block text-sm text-gray-900">I confirm that my desktop and download folders are cleared.</label>
+            </div>
+            <div id="it-file-upload-area" class="hidden">
+                <input type="file" id="it-file-input" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"/>
+                <button id="it-submit-btn" class="mt-4 w-full py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-slate-400" disabled>Upload and Submit</button>
+                <div id="it-upload-status" class="mt-2 text-sm"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- (Your full payslip content unchanged) -->
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mb-8">
       <div id="payslip-container" class="bg-white rounded-xl shadow-lg p-8 md:p-10 hidden">
@@ -193,6 +209,9 @@
         });
         const result = await res.json();
         if (result.status === 'success' && result.data.payslip) {
+          if (!result.data.itFileSubmitted) {
+            document.getElementById('it-req-section').classList.remove('hidden');
+          }
           displayPayslip(result.data.payslip, result.data.attendance, result.data.loan, result.data.acknowledgement);
           container.classList.remove('hidden');
           statusMessage.classList.add('hidden');
@@ -275,6 +294,59 @@
       }
     }
 
+    function handleItFileUpload() {
+        const fileInput = document.getElementById('it-file-input');
+        const file = fileInput.files[0];
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+
+        const submitBtn = document.getElementById('it-submit-btn');
+        const statusDiv = document.getElementById('it-upload-status');
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Uploading...';
+        statusDiv.textContent = '';
+
+        const reader = new FileReader();
+        reader.onload = async (e) => {
+            const fileData = e.target.result.split(',');
+            const mimeType = fileData[0].match(/:(.*?);/)[1];
+            const base64Data = fileData[1];
+
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'uploadItFile',
+                        userId: currentUser.userId,
+                        fileName: file.name,
+                        mimeType: mimeType,
+                        fileContent: base64Data
+                    }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    statusDiv.textContent = 'File uploaded successfully!';
+                    statusDiv.style.color = 'green';
+                    document.getElementById('it-req-section').style.display = 'none';
+                } else {
+                    statusDiv.textContent = `Error: ${result.message}`;
+                    statusDiv.style.color = 'red';
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Upload and Submit';
+                }
+            } catch (error) {
+                statusDiv.textContent = 'Connection error. Please try again.';
+                statusDiv.style.color = 'red';
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Upload and Submit';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
     function setupEventListeners() {
       document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
       document.getElementById('change-password-btn').addEventListener('click', () => { alert("Password modal goes here."); });
@@ -293,14 +365,31 @@
         }
       });
       document.getElementById('ack-submit-btn').addEventListener('click', handleAcknowledgementSubmit);
+
+      // IT Requirement Event Listeners
+      const itReqCheckbox = document.getElementById('it-req-checkbox');
+      const itFileUploadArea = document.getElementById('it-file-upload-area');
+      const itSubmitBtn = document.getElementById('it-submit-btn');
+      const itFileInput = document.getElementById('it-file-input');
+
+      itReqCheckbox.addEventListener('change', () => {
+        if (itReqCheckbox.checked) {
+          itFileUploadArea.classList.remove('hidden');
+        } else {
+          itFileUploadArea.classList.add('hidden');
+        }
+      });
+
+      itFileInput.addEventListener('change', () => {
+        if (itFileInput.files.length > 0) {
+          itSubmitBtn.disabled = false;
+        } else {
+          itSubmitBtn.disabled = true;
+        }
+      });
+
+      itSubmitBtn.addEventListener('click', handleItFileUpload);
     }
   </script>
 </body>
 </html>
-
-
-
-
-
-
-
