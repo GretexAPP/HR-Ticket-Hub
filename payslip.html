@@ -227,8 +227,8 @@
       currentPayslipPeriod = payslipData.PayPeriod;
       const mainContent = document.getElementById('main-payslip-content');
       const payDate = payslipData.PayDate ? new Date(payslipData.PayDate).toLocaleDateString('en-GB') : 'N/A';
-      const earningsComponents = ['BasicSalary', 'HRA', 'SpecialAllowance', 'Bonus', 'Overtime','ESIC','Arrear','Incentive'];
-      const deductionsComponents = ['IncomeTax', 'ProvidentFund', 'ProfessionalTax', 'Loan', 'Late Login Deduction', 'OtherDeduction', 'ESIC'];
+      const earningsComponents = ['BasicSalary', 'HRA', 'Stipend', 'Travelling Allowance', 'Employee State Insurance','Arrears','Overtime','Incentive'];
+      const deductionsComponents = ['IncomeTax', 'ProvidentFund', 'ProfessionalTax', 'Loan', 'Late Login Deduction', 'Other Deduction', 'Employee State Insurance Employer'];
       let earningsHtml = ''; let deductionsHtml = '';
       earningsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { earningsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
       deductionsComponents.forEach(key => { if (payslipData[key] && parseFloat(payslipData[key]) > 0) { deductionsHtml += `<tr><td class="py-1.5 text-slate-600">${key.replace(/([A-Z])/g, ' $1').trim()}</td><td class="text-right font-medium text-slate-800">${formatCurrency(payslipData[key])}</td></tr>`; } });
@@ -393,3 +393,4 @@
   </script>
 </body>
 </html>
+
