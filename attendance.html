@@ -1,3 +1,5 @@
+<!-- V.5 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -66,8 +68,8 @@
     <main class="mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div id="attendance-view">
-                <div class="flex justify-between items-center mb-1">
-                    <button id="correct-attendance-btn" class="py-2 px-4 text-sm font-bold rounded-lg text-white bg-red-600 hover:bg-red-700 shadow-md transition duration-150 whitespace-nowrap">
+                <div class="flex justify-between items-center">
+                    <button id="correct-attendance-btn" class="py-2 px-4 text-sm font-bold rounded-lg text-white bg-red-600 hover:bg-red-700 shadow-md transition duration-150">
                         Correct Your Attendance
                     </button>
                     <h2 class="text-3xl font-bold text-slate-900">My Attendance</h2>
@@ -365,12 +367,13 @@
                 attendanceModal.classList.add('hidden');
             });
 
-            // Event listener for the new button
+            // Event listener for the new button (you'll need to define what it does)
             document.getElementById('correct-attendance-btn').addEventListener('click', () => {
-                alert('Attendance correction feature is being developed. Please contact the HR team for any immediate corrections.');
+                // You can add functionality here, e.g., redirect to a correction form or show a message.
+                alert('Attendance correction feature coming soon! Please contact HR.');
             });
-
-            const noticeBtn = document.getElementById("notice-btn");
+        }
+          const noticeBtn = document.getElementById("notice-btn");
             const noticeCard = document.getElementById("notice-card");
             const closeNotice = document.getElementById("close-notice");
 
