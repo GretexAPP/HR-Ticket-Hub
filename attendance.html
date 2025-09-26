@@ -1,384 +1,388 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Attendance</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Styles for transitions, calendar and modal */
-        #attendance-view, #attendance-modal { transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
-        
-        /* Calendar styles */
-        .calendar-day {
-            transition: background-color 0.2s, transform 0.2s;
-            position: relative;
-            min-height: 100px;
-        }
-        .calendar-day:not(.disabled):hover {
-            background-color: #eff6ff; /* blue-50 */
-            transform: translateY(-2px);
-            cursor: pointer;
-        }
-        .day-number {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            font-size: 0.8rem;
-        }
-        .day-content {
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Attendance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Styles for transitions, calendar and modal */
+        #attendance-view, #attendance-modal { transition: opacity 0.3s ease-out, transform 0.3s ease-out; }
+        
+        /* Calendar styles */
+        .calendar-day {
+            transition: background-color 0.2s, transform 0.2s;
+            position: relative;
+            min-height: 100px;
+        }
+        .calendar-day:not(.disabled):hover {
+            background-color: #eff6ff; /* blue-50 */
+            transform: translateY(-2px);
+            cursor: pointer;
+        }
+        .day-number {
+            position: absolute;
+            top: 4px;
+            right: 4px;
+            font-size: 0.8rem;
+        }
+        .day-content {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body class="bg-slate-100 antialiased">
-    <header class="bg-white shadow-sm sticky top-0 z-20">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-            <img class="h-10" src="logo-1.gif" alt="Logo">
-<!--             <a href="employee.html" class="text-2xl font-bold text-slate-800 cursor-pointer">HR Hub</a> -->
-            <div class="flex items-center gap-2">
-                <div id="userInfo" class="text-right"></div>
-<!--                 <a href="payslip.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Provisional Payslip</a> -->
-                <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Back to Dashboard</a>
-                <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
-            </div>
-        </div>
-    </header>
+    <header class="bg-white shadow-sm sticky top-0 z-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+            <img class="h-10" src="logo-1.gif" alt="Logo">
+            <div class="flex items-center gap-2">
+                <div id="userInfo" class="text-right"></div>
+                <a href="employee.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Back to Dashboard</a>
+                <button id="logout-btn" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">Logout</button>
+            </div>
+        </div>
+    </header>
 
-    <div class="fixed bottom-6 right-6 z-50">
-        <!-- Blinking Icon -->
-        <button id="notice-btn" class="relative p-3 bg-red-600 text-white rounded-full shadow-lg animate-pulse hover:bg-red-700">
-            ⚠️
-        </button>
+    <div class="fixed bottom-6 right-6 z-50">
+                <button id="notice-btn" class="relative p-3 bg-red-600 text-white rounded-full shadow-lg animate-pulse hover:bg-red-700">
+            ⚠️
+        </button>
 
-        <!-- Notice Card -->
-        <div id="notice-card" class="hidden absolute bottom-16 right-0 w-72 bg-white border border-gray-300 rounded-xl shadow-2xl p-4">
-            <div class="flex justify-between items-start">
-            <h2 class="text-lg font-bold text-red-600">Important Notice</h2>
-            <button id="close-notice" class="text-gray-500 hover:text-gray-800 font-bold">✕</button>
-            </div>
-            <p class="mt-2 text-sm text-gray-700">
-<!--         Your attendance records are not yet fully updated, which means there may be a discrepancy between what you see here and on Zoho. Our team is actively working on this, and the records will be updated very soon. We will notify you in the group once the update is complete. -->
-            Kindly check your Attendance we have updated your attendance if you have any query please fill free to connect with HR team
-            <br/>
-            Attendance Updated Till 25-09-2025
-            </p>
-        </div>
-    </div>
+                <div id="notice-card" class="hidden absolute bottom-16 right-0 w-72 bg-white border border-gray-300 rounded-xl shadow-2xl p-4">
+            <div class="flex justify-between items-start">
+            <h2 class="text-lg font-bold text-red-600">Important Notice</h2>
+            <button id="close-notice" class="text-gray-500 hover:text-gray-800 font-bold">✕</button>
+            </div>
+            <p class="mt-2 text-sm text-gray-700">
+            Kindly check your Attendance we have updated your attendance if you have any query please fill free to connect with HR team
+            <br/>
+            Attendance Updated Till 25-09-2025
+            </p>
+        </div>
+    </div>
 
-    <main class="mt-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div id="attendance-view">
-                <h2 class="text-3xl font-bold text-slate-900 mb-1">My Attendance</h2>
-                <p class="text-slate-500 mb-6">A summary of your attendance and login status.<b>Attendance Updated till 25-09-2025 12:00:00 PM</b> </p>
-
-                <!-- Loader -->
-                <div id="loader" class="flex justify-center items-center py-16">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+    <main class="mt-8">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div id="attendance-view">
+                <div class="flex justify-between items-center">
+                    <button id="correct-attendance-btn" class="py-2 px-4 text-sm font-bold rounded-lg text-white bg-red-600 hover:bg-red-700 shadow-md transition duration-150">
+                        Correct Your Attendance
+                    </button>
+                    <h2 class="text-3xl font-bold text-slate-900">My Attendance</h2>
                 </div>
+                                <p class="text-slate-500 mb-6">A summary of your attendance and login status.<b>Attendance Updated till 25-09-2025 12:00:00 PM</b> </p>
 
-                <!-- Content Wrapper (hidden by default) -->
-                <div id="attendance-content" class="hidden">
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-blue-600" id="card-present">0</p><p class="text-sm font-semibold text-slate-500">Present</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-red-600" id="card-absent">0</p><p class="text-sm font-semibold text-slate-500">Absent</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-green-600" id="card-on-time">0</p><p class="text-sm font-semibold text-slate-500">On Time</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-orange-500" id="card-late">0</p><p class="text-sm font-semibold text-slate-500">Late</p></div>
-                        <div class="bg-white p-4 rounded-lg shadow text-center col-span-2 md:col-span-4 lg:col-span-1"><p class="text-2xl font-bold text-slate-700" id="card-total-hours">0h</p><p class="text-sm font-semibold text-slate-500">Late Deduction</p></div>
-                    </div>
+                                <div id="loader" class="flex justify-center items-center py-16">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-600"></div>
+                </div>
 
-                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
-                        <div class="flex justify-between items-center p-4 border-b">
-                            <button id="prev-month-btn" class="p-2 rounded-full hover:bg-slate-100 font-bold">&lt;</button>
-                            <h3 id="month-year-header" class="text-xl font-bold text-slate-800"></h3>
-                            <button id="next-month-btn" class="p-2 rounded-full hover:bg-slate-100 font-bold">&gt;</button>
-                        </div>
-                        <div class="grid grid-cols-7 bg-slate-200">
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Sun</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Mon</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Tue</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Wed</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Thu</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Fri</div>
-                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Sat</div>
-                        </div>
-                        <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-slate-200">
-                            </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </main>
+                                <div id="attendance-content" class="hidden">
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 mb-8">
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-blue-600" id="card-present">0</p><p class="text-sm font-semibold text-slate-500">Present</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-red-600" id="card-absent">0</p><p class="text-sm font-semibold text-slate-500">Absent</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-green-600" id="card-on-time">0</p><p class="text-sm font-semibold text-slate-500">On Time</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center"><p class="text-2xl font-bold text-orange-500" id="card-late">0</p><p class="text-sm font-semibold text-slate-500">Late</p></div>
+                        <div class="bg-white p-4 rounded-lg shadow text-center col-span-2 md:col-span-4 lg:col-span-1"><p class="text-2xl font-bold text-slate-700" id="card-total-hours">0h</p><p class="text-sm font-semibold text-slate-500">Late Deduction</p></div>
+                    </div>
 
-    <div id="attendance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-30">
-        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
-            <div class="flex justify-between items-center border-b pb-3">
-                <h3 class="text-2xl font-bold text-slate-800">Attendance Details<span id="modal-date"></span></h3>
-                <button id="close-attendance-modal-btn" class="text-2xl font-bold hover:text-red-500">&times;</button>
-            </div>
-            <div id="modal-content" class="mt-5 grid grid-cols-2 gap-4 text-sm">
-                </div>
-        </div>
-    </div>
-    
-    <script>
-        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
-        
-        let currentUser = null;
-        let userAttendanceData = {};
-        let currentDate = new Date();
-        
-        // --- ATTENDANCE FUNCTIONS ---
-        async function fetchAttendance(userId) {
-            const loader = document.getElementById('loader');
-            const content = document.getElementById('attendance-content');
-            const calendarGrid = document.getElementById('calendar-grid');
+                    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                        <div class="flex justify-between items-center p-4 border-b">
+                            <button id="prev-month-btn" class="p-2 rounded-full hover:bg-slate-100 font-bold">&lt;</button>
+                            <h3 id="month-year-header" class="text-xl font-bold text-slate-800"></h3>
+                            <button id="next-month-btn" class="p-2 rounded-full hover:bg-slate-100 font-bold">&gt;</button>
+                        </div>
+                        <div class="grid grid-cols-7 bg-slate-200">
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Sun</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Mon</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Tue</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Wed</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Thu</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Fri</div>
+                            <div class="text-center py-2 font-semibold text-slate-600 bg-slate-50 text-sm">Sat</div>
+                        </div>
+                        <div id="calendar-grid" class="grid grid-cols-7 gap-px bg-slate-200">
+                            </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
 
-            // Show loader and hide content
-            loader.classList.remove('hidden');
-            content.classList.add('hidden');
+    <div id="attendance-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-30">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-lg shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-2xl font-bold text-slate-800">Attendance Details<span id="modal-date"></span></h3>
+                <button id="close-attendance-modal-btn" class="text-2xl font-bold hover:text-red-500">&times;</button>
+            </div>
+            <div id="modal-content" class="mt-5 grid grid-cols-2 gap-4 text-sm">
+                </div>
+        </div>
+    </div>
+    
+    <script>
+        const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
+        
+        let currentUser = null;
+        let userAttendanceData = {};
+        let currentDate = new Date();
+        
+        // --- ATTENDANCE FUNCTIONS ---
+        async function fetchAttendance(userId) {
+            const loader = document.getElementById('loader');
+            const content = document.getElementById('attendance-content');
+            const calendarGrid = document.getElementById('calendar-grid');
 
-            try {
-                const res = await fetch(WEB_APP_URL, {
-                    method: 'POST',
-                    body: JSON.stringify({ action: 'getAttendance', userId: userId }),
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    userAttendanceData = result.attendance;
-                    renderCalendar(currentDate, userAttendanceData);
-                    updateSummaryCards(userAttendanceData);
-                } else {
-                    console.error("Failed to fetch attendance:", result.message);
-                    calendarGrid.innerHTML = `<p class="col-span-7 text-center text-red-500 p-4">Could not load attendance data.</p>`;
-                }
-            } catch (error) {
-                console.error("Connection error while fetching attendance:", error);
-                calendarGrid.innerHTML = `<p class="col-span-7 text-center text-red-500 p-4">Connection error.</p>`;
-            } finally {
-                // Hide loader and show content regardless of outcome
-                loader.classList.add('hidden');
-                content.classList.remove('hidden');
-            }
-        }
-        
-        function renderCalendar(date, data) {
-            const calendarGrid = document.getElementById('calendar-grid');
-            const monthYearHeader = document.getElementById('month-year-header');
-            
-            const month = date.getMonth();
-            const year = date.getFullYear();
+            // Show loader and hide content
+            loader.classList.remove('hidden');
+            content.classList.add('hidden');
 
-            monthYearHeader.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-            
-            calendarGrid.innerHTML = ''; // Clear previous days
-            
-            const firstDayOfMonth = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            try {
+                const res = await fetch(WEB_APP_URL, {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'getAttendance', userId: userId }),
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' }
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    userAttendanceData = result.attendance;
+                    renderCalendar(currentDate, userAttendanceData);
+                    updateSummaryCards(userAttendanceData);
+                } else {
+                    console.error("Failed to fetch attendance:", result.message);
+                    calendarGrid.innerHTML = `<p class="col-span-7 text-center text-red-500 p-4">Could not load attendance data.</p>`;
+                }
+            } catch (error) {
+                console.error("Connection error while fetching attendance:", error);
+                calendarGrid.innerHTML = `<p class="col-span-7 text-center text-red-500 p-4">Connection error.</p>`;
+            } finally {
+                // Hide loader and show content regardless of outcome
+                loader.classList.add('hidden');
+                content.classList.remove('hidden');
+            }
+        }
+        
+        function renderCalendar(date, data) {
+            const calendarGrid = document.getElementById('calendar-grid');
+            const monthYearHeader = document.getElementById('month-year-header');
+            
+            const month = date.getMonth();
+            const year = date.getFullYear();
 
-            for (let i = 0; i < firstDayOfMonth; i++) {
-                calendarGrid.insertAdjacentHTML('beforeend', `<div class="bg-slate-50 disabled"></div>`);
-            }
+            monthYearHeader.textContent = date.toLocaleString('default', { month: 'long', year: 'numeric' });
+            
+            calendarGrid.innerHTML = ''; // Clear previous days
+            
+            const firstDayOfMonth = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            for (let day = 1; day <= daysInMonth; day++) {
-                const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                const dayData = data[formattedDate];
-                
-                let dayContent = '';
-                let dataAttributes = '';
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarGrid.insertAdjacentHTML('beforeend', `<div class="bg-slate-50 disabled"></div>`);
+            }
 
-                if (dayData) {
-                    dataAttributes = `data-details='${JSON.stringify(dayData)}'`;
-                    const attendanceBadge = `<span class="text-xs px-2 py-1 rounded-full text-white ${getAttendanceColor(dayData.Attendance)}">${dayData.Attendance || 'N/A'}</span>`;
-                    const statusText = `<p class="mt-1 text-xs ${dayData.LoginStatus === 'Late Login' ? 'text-orange-500' : 'text-green-500'}">${dayData.LoginStatus || ''}</p>`;
-                    dayContent = `<div class="flex flex-col justify-center items-center h-full p-1">${attendanceBadge}${statusText}</div>`;
-                }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const formattedDate = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayData = data[formattedDate];
+                
+                let dayContent = '';
+                let dataAttributes = '';
 
-                const dayHtml = `
-                    <div class="calendar-day bg-white" ${dataAttributes}>
-                        <span class="day-number text-slate-500 p-1">${day}</span>
-                        <div class="day-content">${dayContent}</div>
-                    </div>`;
-                calendarGrid.insertAdjacentHTML('beforeend', dayHtml);
-            }
-        }
+                if (dayData) {
+                    dataAttributes = `data-details='${JSON.stringify(dayData)}'`;
+                    const attendanceBadge = `<span class="text-xs px-2 py-1 rounded-full text-white ${getAttendanceColor(dayData.Attendance)}">${dayData.Attendance || 'N/A'}</span>`;
+                    const statusText = `<p class="mt-1 text-xs ${dayData.LoginStatus === 'Late Login' ? 'text-orange-500' : 'text-green-500'}">${dayData.LoginStatus || ''}</p>`;
+                    dayContent = `<div class="flex flex-col justify-center items-center h-full p-1">${attendanceBadge}${statusText}</div>`;
+                }
 
-        function getAttendanceColor(status) {
-            switch(status) {
-                case 'P': return 'bg-blue-500';
-                case 'A': return 'bg-red-500';
-                case 'H': return 'bg-indigo-500';
-                case 'L': return 'bg-yellow-500';
-                case 'W/F': return 'bg-green-500';
-                case 'HD': return 'bg-cyan-500';
-                default: return 'bg-gray-400';
-            }
-        }
+                const dayHtml = `
+                    <div class="calendar-day bg-white" ${dataAttributes}>
+                        <span class="day-number text-slate-500 p-1">${day}</span>
+                        <div class="day-content">${dayContent}</div>
+                    </div>`;
+                calendarGrid.insertAdjacentHTML('beforeend', dayHtml);
+            }
+        }
 
-        function updateSummaryCards(data) {
-            let present = 0, absent = 0, onTime = 0, late = 0;
-            
-            for (const date in data) {
-                const record = data[date];
-                if (record.Attendance === 'P' || record.Attendance === 'HD' || record.Attendance === 'W/F') present++;
-                if (record.Attendance === 'A') absent++;
-                if (record.LoginStatus === 'On Time') onTime++;
-                if (record.LoginStatus === 'Late Login') late++;
-            }
+        function getAttendanceColor(status) {
+            switch(status) {
+                case 'P': return 'bg-blue-500';
+                case 'A': return 'bg-red-500';
+                case 'H': return 'bg-indigo-500';
+                case 'L': return 'bg-yellow-500';
+                case 'W/F': return 'bg-green-500';
+                case 'HD': return 'bg-cyan-500';
+                default: return 'bg-gray-400';
+            }
+        }
 
-            let newValue;
-            if (late < 3) {
-                newValue = 0;
-            } else if (late === 3) {
-                newValue = 0.5;
-            } else if (late === 4) {
-                newValue = 0.5;
-            } else if (late === 5) {
-                newValue = 1;
-            } else if (late === 6) {
-                newValue = 1.5;
-            } else if (late === 7) {
-                newValue = 2;
-            } else if (late === 8) {
-                newValue = 2.5;
-            } else if (late === 9) {
-                newValue = 3;
-            } else if (late === 10) {
-                newValue = 3.5;
-            } else if (late === 11) {
-                newValue = 4;
-            } else if (late === 12) {
-                newValue = 4.5;
-            } else if (late === 13) {
-                newValue = 5;
-            } else if (late === 14) {
-                newValue = 5.5;
-            } else if (late === 15) {
-                newValue = 6;
-            } else if (late === 16) {
-                newValue = 6.5;
-            } else if (late === 17) {
-                newValue = 7;
-            } else if (late === 18) {
-                newValue = 7.5;
-            } else if (late === 19) {
-                newValue = 8;
-            } else if (late === 20) {
-                newValue = 8.5;
-            } else if (late === 21) {
-                newValue = 9;
-            } else if (late === 22) {
-                newValue = 9.5;
-            } else if (late === 23) {
-                newValue = 10;
-            } else if (late === 24) {
-                newValue = 10.5;
-            } else if (late === 25) {
-                newValue = 11;
-            } else if (late === 26) {
-                newValue = 11.5;
-            } else if (late === 27) {
-                newValue = 12;
-            } else if (late === 28) {
-                newValue = 12.5;
-            } else if (late === 29) {
-                newValue = 13;
-            } else if (late === 30) {
-                newValue = 13.5;
-            } else if (late === 31) {
-                newValue = 14;
-            } else { 
-                newValue = "nan";
-            }
+        function updateSummaryCards(data) {
+            let present = 0, absent = 0, onTime = 0, late = 0;
+            
+            for (const date in data) {
+                const record = data[date];
+                if (record.Attendance === 'P' || record.Attendance === 'HD' || record.Attendance === 'W/F') present++;
+                if (record.Attendance === 'A') absent++;
+                if (record.LoginStatus === 'On Time') onTime++;
+                if (record.LoginStatus === 'Late Login') late++;
+            }
 
-            document.getElementById('card-present').textContent = present;
-            document.getElementById('card-absent').textContent = absent;
-            document.getElementById('card-on-time').textContent = onTime;
-            document.getElementById('card-late').textContent = late;
-            document.getElementById('card-total-hours').textContent = `${newValue} days`;
-        }
+            let newValue;
+            if (late < 3) {
+                newValue = 0;
+            } else if (late === 3) {
+                newValue = 0.5;
+            } else if (late === 4) {
+                newValue = 0.5;
+            } else if (late === 5) {
+                newValue = 1;
+            } else if (late === 6) {
+                newValue = 1.5;
+            } else if (late === 7) {
+                newValue = 2;
+            } else if (late === 8) {
+                newValue = 2.5;
+            } else if (late === 9) {
+                newValue = 3;
+            } else if (late === 10) {
+                newValue = 3.5;
+            } else if (late === 11) {
+                newValue = 4;
+            } else if (late === 12) {
+                newValue = 4.5;
+            } else if (late === 13) {
+                newValue = 5;
+            } else if (late === 14) {
+                newValue = 5.5;
+            } else if (late === 15) {
+                newValue = 6;
+            } else if (late === 16) {
+                newValue = 6.5;
+            } else if (late === 17) {
+                newValue = 7;
+            } else if (late === 18) {
+                newValue = 7.5;
+            } else if (late === 19) {
+                newValue = 8;
+            } else if (late === 20) {
+                newValue = 8.5;
+            } else if (late === 21) {
+                newValue = 9;
+            } else if (late === 22) {
+                newValue = 9.5;
+            } else if (late === 23) {
+                newValue = 10;
+            } else if (late === 24) {
+                newValue = 10.5;
+            } else if (late === 25) {
+                newValue = 11;
+            } else if (late === 26) {
+                newValue = 11.5;
+            } else if (late === 27) {
+                newValue = 12;
+            } else if (late === 28) {
+                newValue = 12.5;
+            } else if (late === 29) {
+                newValue = 13;
+            } else if (late === 30) {
+                newValue = 13.5;
+            } else if (late === 31) {
+                newValue = 14;
+            } else { 
+                newValue = "nan";
+            }
 
-        function showAttendanceModal(details) {
-            const attendanceModal = document.getElementById('attendance-modal');
-            const contentDiv = document.getElementById('modal-content');
-            
-            const checkinDate = new Date(details.CheckinAt);
-            const checkoutDate = new Date(details.CheckoutAt);
+            document.getElementById('card-present').textContent = present;
+            document.getElementById('card-absent').textContent = absent;
+            document.getElementById('card-on-time').textContent = onTime;
+            document.getElementById('card-late').textContent = late;
+            document.getElementById('card-total-hours').textContent = `${newValue} days`;
+        }
 
-            const userFriendlyDate = checkinDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-            document.getElementById('modal-date').textContent = "";
+        function showAttendanceModal(details) {
+            const attendanceModal = document.getElementById('attendance-modal');
+            const contentDiv = document.getElementById('modal-content');
+            
+            const checkinDate = new Date(details.CheckinAt);
+            const checkoutDate = new Date(details.CheckoutAt);
 
-            let formattedTotalTime = 'N/A';
-            if (!isNaN(checkinDate) && !isNaN(checkoutDate)) {
-                const totalMilliseconds = checkoutDate.getTime() - checkinDate.getTime();
-                const totalHours = Math.floor(totalMilliseconds / (1000 * 60 * 60));
-                const totalMinutes = Math.floor((totalMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
-                formattedTotalTime = `${totalHours}h ${totalMinutes}m`;
-            }
-            
-            contentDiv.innerHTML = `
-                <div class="font-semibold text-slate-500">Status:</div> <div class="font-bold text-slate-800">${details.Attendance || 'N/A'}</div>
-                <div class="font-semibold text-slate-500">Login Status:</div> <div class="font-bold text-slate-800">${details.LoginStatus || 'N/A'}</div>
-                <div class="font-semibold text-slate-500">Check-in:</div> <div class="font-bold text-slate-800">${!isNaN(checkinDate) ? checkinDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</div>
-                <div class="font-semibold text-slate-500">Check-out:</div> <div class="font-bold text-slate-800">${!isNaN(checkoutDate) ? checkoutDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</div>
-                <div class="font-semibold text-slate-500">Total Hours:</div> <div class="font-bold text-slate-800">${formattedTotalTime}</div>
-                <div class="font-semibold text-slate-500">Shift:</div> <div class="font-bold text-slate-800">${details.Shift || 'N/A'}</div>
-                <div class="font-semibold text-slate-500">Grace Time:</div> <div class="font-bold text-slate-800">${details.GraceTime || 'N/A'}</div>
-            `;
-            attendanceModal.classList.remove('hidden');
-        }
+            const userFriendlyDate = checkinDate.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            document.getElementById('modal-date').textContent = "";
 
-        // --- MAIN INITIALIZATION & EVENT LISTENERS ---
-        document.addEventListener('DOMContentLoaded', () => {
-            currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
-            if (!currentUser || currentUser.role !== 'EMP') { window.location.href = 'index.html'; return; }
-            document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
-            
-            fetchAttendance(currentUser.userId);
-            setupEventListeners();
-        });
-        
-        function setupEventListeners() {
-            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+            let formattedTotalTime = 'N/A';
+            if (!isNaN(checkinDate) && !isNaN(checkoutDate)) {
+                const totalMilliseconds = checkoutDate.getTime() - checkinDate.getTime();
+                const totalHours = Math.floor(totalMilliseconds / (1000 * 60 * 60));
+                const totalMinutes = Math.floor((totalMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+                formattedTotalTime = `${totalHours}h ${totalMinutes}m`;
+            }
+            
+            contentDiv.innerHTML = `
+                <div class="font-semibold text-slate-500">Status:</div> <div class="font-bold text-slate-800">${details.Attendance || 'N/A'}</div>
+                <div class="font-semibold text-slate-500">Login Status:</div> <div class="font-bold text-slate-800">${details.LoginStatus || 'N/A'}</div>
+                <div class="font-semibold text-slate-500">Check-in:</div> <div class="font-bold text-slate-800">${!isNaN(checkinDate) ? checkinDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</div>
+                <div class="font-semibold text-slate-500">Check-out:</div> <div class="font-bold text-slate-800">${!isNaN(checkoutDate) ? checkoutDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : 'N/A'}</div>
+                <div class="font-semibold text-slate-500">Total Hours:</div> <div class="font-bold text-slate-800">${formattedTotalTime}</div>
+                <div class="font-semibold text-slate-500">Shift:</div> <div class="font-bold text-slate-800">${details.Shift || 'N/A'}</div>
+                <div class="font-semibold text-slate-500">Grace Time:</div> <div class="font-bold text-slate-800">${details.GraceTime || 'N/A'}</div>
+            `;
+            attendanceModal.classList.remove('hidden');
+        }
 
-            document.getElementById('prev-month-btn').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar(currentDate, userAttendanceData);
+        // --- MAIN INITIALIZATION & EVENT LISTENERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
+            if (!currentUser || currentUser.role !== 'EMP') { window.location.href = 'index.html'; return; }
+            document.getElementById('userInfo').innerHTML = `<p class="font-semibold">${currentUser.fullName}</p><p class="text-sm text-slate-500">${currentUser.email}</p>`;
+            
+            fetchAttendance(currentUser.userId);
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            document.getElementById('logout-btn').addEventListener('click', () => { sessionStorage.removeItem('loggedInUser'); window.location.href = 'index.html'; });
+
+            document.getElementById('prev-month-btn').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() - 1);
+                renderCalendar(currentDate, userAttendanceData);
+            });
+
+            document.getElementById('next-month-btn').addEventListener('click', () => {
+                currentDate.setMonth(currentDate.getMonth() + 1);
+                renderCalendar(currentDate, userAttendanceData);
+            });
+
+            document.getElementById('calendar-grid').addEventListener('click', (e) => {
+                const dayElement = e.target.closest('.calendar-day');
+                if (dayElement && dayElement.dataset.details) {
+                    const details = JSON.parse(dayElement.dataset.details);
+                    showAttendanceModal(details);
+                }
+            });
+
+            document.getElementById('close-attendance-modal-btn').addEventListener('click', () => {
+                const attendanceModal = document.getElementById('attendance-modal');
+                attendanceModal.classList.add('hidden');
+            });
+
+            // Event listener for the new button (you'll need to define what it does)
+            document.getElementById('correct-attendance-btn').addEventListener('click', () => {
+                // You can add functionality here, e.g., redirect to a correction form or show a message.
+                alert('Attendance correction feature coming soon! Please contact HR.');
             });
+        }
+          const noticeBtn = document.getElementById("notice-btn");
+            const noticeCard = document.getElementById("notice-card");
+            const closeNotice = document.getElementById("close-notice");
 
-            document.getElementById('next-month-btn').addEventListener('click', () => {
-                currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar(currentDate, userAttendanceData);
-            });
+            noticeBtn.addEventListener("click", () => {
+                noticeCard.classList.toggle("hidden");
+            });
 
-            document.getElementById('calendar-grid').addEventListener('click', (e) => {
-                const dayElement = e.target.closest('.calendar-day');
-                if (dayElement && dayElement.dataset.details) {
-                    const details = JSON.parse(dayElement.dataset.details);
-                    showAttendanceModal(details);
-                }
-            });
+            closeNotice.addEventListener("click", () => {
+                noticeCard.classList.add("hidden");
+            });
 
-            document.getElementById('close-attendance-modal-btn').addEventListener('click', () => {
-                const attendanceModal = document.getElementById('attendance-modal');
-                attendanceModal.classList.add('hidden');
-            });
-        }
-          const noticeBtn = document.getElementById("notice-btn");
-            const noticeCard = document.getElementById("notice-card");
-            const closeNotice = document.getElementById("close-notice");
-
-            noticeBtn.addEventListener("click", () => {
-                noticeCard.classList.toggle("hidden");
-            });
-
-            closeNotice.addEventListener("click", () => {
-                noticeCard.classList.add("hidden");
-            });
-
-    </script>
+    </script>
 </body>
 </html>
