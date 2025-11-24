@@ -1,3 +1,5 @@
+<!-- V2.7 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,7 +7,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Super Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- IMPORTANT: Add Chart.js library for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* Simple styling for better UX on chatbot buttons */
@@ -33,8 +34,7 @@
 
     <main class="mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Main Navigation Links -->
-             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <a href="superadmin.html" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
                     <h2 class="text-2xl font-bold text-blue-600">Ticket Overview</h2>
                     <p class="text-slate-500 mt-1">View, filter, and manage all system tickets.</p>
@@ -45,7 +45,6 @@
                 </a>
             </div>
 
-            <!-- KPI Stat Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <div class="bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-slate-500 font-semibold">Total Tickets</h3>
@@ -65,7 +64,6 @@
                 </div>
             </div>
 
-            <!-- Charts -->
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-lg">
                     <h3 class="text-xl font-bold text-slate-800 mb-4">Tickets by Category</h3>
@@ -80,17 +78,26 @@
                     </div>
                 </div>
             </div>
+
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">Closed Ticket Resolution Speed</h3>
+                    <span class="text-sm text-slate-500">Days taken to close tickets</span>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="resolutionTimeChart"></canvas>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- SUPER ADMIN COMMAND BOT INTERFACE -->
     <div id="sa-chatbot-container" class="fixed bottom-5 right-5 z-40">
         <div id="sa-chatbot-window" class="w-96 h-[500px] bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right transition-transform">
             <div class="bg-slate-800 text-white p-3 rounded-t-xl">
                 <h3 class="font-bold text-center">Command Assistant</h3>
             </div>
             <div id="sa-chatbot-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
-                <!-- Welcome Message -->
                 <div class="flex">
                     <div class="text-sm p-3 bg-slate-200 rounded-lg">
                         <p class="font-semibold mb-2">Ready for commands. Try things like:</p>
@@ -109,9 +116,7 @@
                 <button id="sa-chatbot-send-btn" class="bg-slate-800 text-white px-4 rounded-r-md hover:bg-slate-900 flex items-center justify-center font-bold text-2xl">&rarr;</button>
             </div>
         </div>
-<!--         <button id="sa-chatbot-toggle-btn" class="bg-slate-800 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto cursor-pointer">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l4-4 4 4m0 6l-4 4-4-4"></path></svg>
-        </button> -->
+
         <button id="sa-chatbot-toggle-btn" class="bg-slate-800 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
             <rect x="4" y="5" width="16" height="14" rx="2" fill="#d1d5db" />
@@ -187,6 +192,80 @@
             new Chart(categoryCtx, {
                 type: 'bar', data: { labels: Object.keys(categoryCounts), datasets: [{ label: 'Number of Tickets', data: Object.values(categoryCounts), backgroundColor: '#3B82F6' }] },
                 options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false }
+            });
+
+            // 3. Resolution Time Analysis (NEW Bar Chart)
+            // Buckets setup
+            const resolutionBuckets = {
+                '1 Day': 0,
+                '2 Days': 0,
+                '3 Days': 0,
+                '7 Days': 0,
+                '15 Days': 0,
+                '30 Days': 0,
+                '> 30 Days': 0
+            };
+
+            tickets.forEach(t => {
+                // <--- CHECK THESE FIELD NAMES: 'Status', 'Timestamp', 'ClosedDate'
+                // Ensure the ticket is closed and has both dates available
+                if (t.Status === 'Closed' && t.Timestamp && t.ClosedDate) {
+                    const created = new Date(t.Timestamp);
+                    const closed = new Date(t.ClosedDate);
+                    
+                    if (!isNaN(created) && !isNaN(closed)) {
+                        // Calculate difference in days
+                        const diffTime = Math.abs(closed - created);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
+
+                        if (diffDays <= 1) resolutionBuckets['1 Day']++;
+                        else if (diffDays <= 2) resolutionBuckets['2 Days']++;
+                        else if (diffDays <= 3) resolutionBuckets['3 Days']++;
+                        else if (diffDays <= 7) resolutionBuckets['7 Days']++;
+                        else if (diffDays <= 15) resolutionBuckets['15 Days']++;
+                        else if (diffDays <= 30) resolutionBuckets['30 Days']++;
+                        else resolutionBuckets['> 30 Days']++;
+                    }
+                }
+            });
+
+            const resolutionCtx = document.getElementById('resolutionTimeChart').getContext('2d');
+            new Chart(resolutionCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(resolutionBuckets),
+                    datasets: [{
+                        label: 'Tickets Closed Within',
+                        data: Object.values(resolutionBuckets),
+                        backgroundColor: [
+                            '#10B981', // 1 Day (Green - Excellent)
+                            '#34D399', // 2 Days
+                            '#60A5FA', // 3 Days
+                            '#3B82F6', // 7 Days (Blue - Standard)
+                            '#FBBF24', // 15 Days (Yellow - Warning)
+                            '#F87171', // 30 Days (Orange - Late)
+                            '#EF4444'  // >30 Days (Red - Critical)
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: { stepSize: 1 },
+                            title: { display: true, text: 'Count of Tickets' }
+                        },
+                        x: {
+                            title: { display: true, text: 'Time to Close' }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
             });
         }
 
@@ -334,4 +413,3 @@
     </script>
 </body>
 </html>
-
