@@ -1,5 +1,3 @@
-<!-- V2.7 -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -34,6 +32,7 @@
 
     <main class="mt-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                 <a href="superadmin.html" class="bg-white p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow text-center">
                     <h2 class="text-2xl font-bold text-blue-600">Ticket Overview</h2>
@@ -89,6 +88,16 @@
                 </div>
             </div>
 
+            <div class="bg-white p-6 rounded-xl shadow-lg mb-8">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-slate-800">Average Resolution Time by Staff</h3>
+                    <span class="text-sm text-slate-500">Average days taken to close tickets (User Wise)</span>
+                </div>
+                <div class="relative h-80">
+                    <canvas id="userPerformanceChart"></canvas>
+                </div>
+            </div>
+
         </div>
     </main>
 
@@ -120,26 +129,20 @@
         <button id="sa-chatbot-toggle-btn" class="bg-slate-800 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto cursor-pointer">
             <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor">
             <rect x="4" y="5" width="16" height="14" rx="2" fill="#d1d5db" />
-            
             <path d="M12 21a2 2 0 0 1-2-2h4a2 2 0 0 1-2 2z" fill="#94a3b8" />
-            
             <circle cx="15" cy="11" r="2" fill="#3b82f6" />
-            
             <circle cx="9" cy="11" r="2" fill="#3b82f6" />
-        
             <path d="M10 16a2 2 0 1 0 4 0h-4z" fill="#374151" />
-            
             <line x1="12" y1="5" x2="12" y2="2" stroke="#ef4444" stroke-width="2" stroke-linecap="round" />
-                <circle cx="12" cy="2" r="1.5" fill="#ef4444" />
+            <circle cx="12" cy="2" r="1.5" fill="#ef4444" />
             </svg>
         </button>
-        
     </div>
 
     <script>
         const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbzgItPIGO4OU5yIUdcT5uJOrM5R8Sybp8qm_8x_Rg1uMXMjf5nziaKhYgD0XUvsIWg/exec'; // <-- PASTE YOUR URL HERE
         let currentUser = null;
-        let botContext = {}; // Context for the command bot
+        let botContext = {}; 
 
         document.addEventListener('DOMContentLoaded', () => {
             currentUser = JSON.parse(sessionStorage.getItem('loggedInUser'));
@@ -153,7 +156,6 @@
             setupBotListeners();
         });
 
-        // --- DASHBOARD & CHART FUNCTIONS ---
         async function fetchDashboardData() {
             try {
                 const response = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getSuperAdminTickets' }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
@@ -178,7 +180,7 @@
         }
 
         function renderCharts(tickets) {
-            // 1. Tickets by Status (Doughnut Chart)
+            // 1. Tickets by Status
             const statusCounts = tickets.reduce((acc, ticket) => { acc[ticket.Status] = (acc[ticket.Status] || 0) + 1; return acc; }, {});
             const statusCtx = document.getElementById('ticketsByStatusChart').getContext('2d');
             new Chart(statusCtx, {
@@ -186,7 +188,7 @@
                 options: { responsive: true, maintainAspectRatio: false }
             });
 
-            // 2. Tickets by Category (Bar Chart)
+            // 2. Tickets by Category
             const categoryCounts = tickets.reduce((acc, ticket) => { acc[ticket.Issue] = (acc[ticket.Issue] || 0) + 1; return acc; }, {});
             const categoryCtx = document.getElementById('ticketsByCategoryChart').getContext('2d');
             new Chart(categoryCtx, {
@@ -194,30 +196,21 @@
                 options: { scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } }, responsive: true, maintainAspectRatio: false }
             });
 
-            // 3. Resolution Time Analysis (NEW Bar Chart)
-            // Buckets setup
-            const resolutionBuckets = {
-                '1 Day': 0,
-                '2 Days': 0,
-                '3 Days': 0,
-                '7 Days': 0,
-                '15 Days': 0,
-                '30 Days': 0,
-                '> 30 Days': 0
-            };
+            // 3 & 4. Resolution Analysis
+            const resolutionBuckets = { '1 Day': 0, '2 Days': 0, '3 Days': 0, '7 Days': 0, '15 Days': 0, '30 Days': 0, '> 30 Days': 0 };
+            const userStats = {}; // { "Anup Singh": { totalDays: 10, count: 2 } }
 
             tickets.forEach(t => {
-                // <--- CHECK THESE FIELD NAMES: 'Status', 'Timestamp', 'ClosedDate'
-                // Ensure the ticket is closed and has both dates available
                 if (t.Status === 'Closed' && t.Timestamp && t.ClosedDate) {
                     const created = new Date(t.Timestamp);
                     const closed = new Date(t.ClosedDate);
                     
                     if (!isNaN(created) && !isNaN(closed)) {
-                        // Calculate difference in days
+                        // Days Calculation
                         const diffTime = Math.abs(closed - created);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
 
+                        // Bucket Logic (Chart 3)
                         if (diffDays <= 1) resolutionBuckets['1 Day']++;
                         else if (diffDays <= 2) resolutionBuckets['2 Days']++;
                         else if (diffDays <= 3) resolutionBuckets['3 Days']++;
@@ -225,10 +218,21 @@
                         else if (diffDays <= 15) resolutionBuckets['15 Days']++;
                         else if (diffDays <= 30) resolutionBuckets['30 Days']++;
                         else resolutionBuckets['> 30 Days']++;
+
+                        // User Logic (Chart 4)
+                        const assignee = t.AssignedToName || "Unassigned"; 
+                        if (assignee !== "Unassigned") {
+                            if (!userStats[assignee]) {
+                                userStats[assignee] = { totalDays: 0, count: 0 };
+                            }
+                            userStats[assignee].totalDays += diffDays;
+                            userStats[assignee].count += 1;
+                        }
                     }
                 }
             });
 
+            // Render Chart 3: General Resolution Speed
             const resolutionCtx = document.getElementById('resolutionTimeChart').getContext('2d');
             new Chart(resolutionCtx, {
                 type: 'bar',
@@ -237,33 +241,52 @@
                     datasets: [{
                         label: 'Tickets Closed Within',
                         data: Object.values(resolutionBuckets),
-                        backgroundColor: [
-                            '#10B981', // 1 Day (Green - Excellent)
-                            '#34D399', // 2 Days
-                            '#60A5FA', // 3 Days
-                            '#3B82F6', // 7 Days (Blue - Standard)
-                            '#FBBF24', // 15 Days (Yellow - Warning)
-                            '#F87171', // 30 Days (Orange - Late)
-                            '#EF4444'  // >30 Days (Red - Critical)
-                        ],
+                        backgroundColor: ['#10B981', '#34D399', '#60A5FA', '#3B82F6', '#FBBF24', '#F87171', '#EF4444'],
+                        borderWidth: 1
+                    }]
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false, 
+                    scales: { 
+                        y: { beginAtZero: true, title: { display: true, text: 'Count of Tickets' } }, 
+                        x: { title: { display: true, text: 'Time to Close' } } 
+                    }, 
+                    plugins: { legend: { display: false } } 
+                }
+            });
+
+            // Render Chart 4: User Performance
+            const userLabels = Object.keys(userStats);
+            const userData = userLabels.map(name => (userStats[name].totalDays / userStats[name].count).toFixed(1));
+
+            const userPerfCtx = document.getElementById('userPerformanceChart').getContext('2d');
+            new Chart(userPerfCtx, {
+                type: 'bar',
+                data: {
+                    labels: userLabels,
+                    datasets: [{
+                        label: 'Average Days to Close',
+                        data: userData,
+                        backgroundColor: '#8B5CF6', 
+                        borderColor: '#7C3AED',
                         borderWidth: 1
                     }]
                 },
                 options: {
+                    indexAxis: 'y', // Horizontal Bar Chart
                     responsive: true,
                     maintainAspectRatio: false,
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: { stepSize: 1 },
-                            title: { display: true, text: 'Count of Tickets' }
-                        },
-                        x: {
-                            title: { display: true, text: 'Time to Close' }
-                        }
+                        x: { beginAtZero: true, title: { display: true, text: 'Avg Days' } }
                     },
                     plugins: {
-                        legend: { display: false }
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) { return context.raw + ' Days (Avg)'; }
+                            }
+                        }
                     }
                 }
             });
@@ -284,13 +307,11 @@
                 if (e.key === 'Enter') sendCommand();
             });
 
-            // Master listener for button clicks
             saMessagesContainer.addEventListener('click', function(e) {
                 if (e.target.classList.contains('chatbot-button')) {
                     const payload = e.target.dataset.payload;
                     const buttonText = e.target.textContent;
                     appendMessage(buttonText, 'user');
-                    // Disable the buttons after clicking
                     e.target.parentElement.querySelectorAll('.chatbot-button').forEach(btn => btn.disabled = true);
                     sendCommand(payload);
                 }
@@ -312,11 +333,7 @@
             try {
                 const res = await fetch(WEB_APP_URL, {
                     method: 'POST',
-                    body: JSON.stringify({ 
-                        action: 'executeSuperAdminCommand', 
-                        command: command,
-                        context: botContext 
-                    }),
+                    body: JSON.stringify({ action: 'executeSuperAdminCommand', command: command, context: botContext }),
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' }
                 });
                 const result = await res.json();
@@ -376,7 +393,6 @@
             saMessagesContainer.scrollTop = saMessagesContainer.scrollHeight;
         }
 
-        // --- RENDER FUNCTIONS FOR RICH RESPONSES ---
         function renderTicketList(tickets) {
             let ticketsHtml = tickets.slice(0, 10).map(t => `
                 <div class="border-t p-2">
@@ -402,7 +418,7 @@
 
         function renderReportSummary(report) {
             let countsHtml = Object.entries(report.counts)
-                .sort(([,a],[,b]) => b-a) // Sort descending
+                .sort(([,a],[,b]) => b-a) 
                 .map(([key, value]) => `<tr><td class="p-1 pr-4">${key}</td><td class="p-1 font-bold text-right">${value}</td></tr>`)
                 .join('');
             return `<div class="text-sm bg-slate-50 rounded-lg w-full p-2">
