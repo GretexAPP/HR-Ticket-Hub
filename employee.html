@@ -15,7 +15,6 @@
     <header class="bg-white shadow-sm sticky top-0 z-20">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
             <img class="h-10" src="logo-1.gif" alt="Logo">
-<!--             <h1 class="text-2xl font-bold text-slate-800">HR Hub</h1> -->
             <div class="flex items-center gap-2">
                 <div id="userInfo" class="text-right"></div>
                 <a href="attendance.html" class="py-2 px-4 text-sm font-medium rounded-lg text-slate-600 hover:bg-slate-100 border border-slate-300">My Attendance</a>
@@ -81,7 +80,6 @@
                                         <option value="" disabled selected>Select a request type...</option>
                                         <option value="Individual">Individual</option>
                                         <option value="Group">Group</option>
-<!--                                         <option value="Request">Make a Request</option> -->
                                     </select>
                                 </div>
                                 <div class="md:col-span-2">
@@ -113,6 +111,7 @@
                 <button id="close-pw-modal-btn" class="text-2xl font-bold hover:text-red-500">&times;</button>
             </div>
             <form id="change-password-form" class="mt-5 space-y-4">
+                <!-- Form fields -->
                 <div>
                     <label for="old-password" class="font-semibold text-slate-700 block mb-1">Old Password</label>
                     <input type="password" id="old-password" required class="w-full border-slate-300 rounded-lg shadow-sm h-11 px-3">
@@ -133,37 +132,27 @@
         </div>
     </div>
     
-    <!-- CHATBOT INTERFACE -->
-<!--     <div id="chatbot-container" class="fixed bottom-5 right-5 z-40">
-        <div id="chatbot-window" class="w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right">
-            <div class="bg-blue-600 text-white p-3 rounded-t-xl flex justify-between items-center">
-                <h3 class="font-bold text-center">HR Help Bot</h3>
+    <!-- NEW: TICKET DETAIL MODAL -->
+    <div id="ticket-detail-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-30">
+        <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="text-2xl font-bold text-slate-800">Ticket Details</h3>
+                <button id="close-ticket-modal-btn" class="text-2xl font-bold hover:text-red-500">&times;</button>
             </div>
-            <div id="chatbot-messages" class="flex-1 p-4 overflow-y-auto h-64 space-y-2">
-                <div class="flex"><div class="text-sm p-2 bg-slate-200 rounded-lg">Hi! How can I help you today? Ask me about payroll, leave, dress code, etc.</div></div>
-            </div>
-            <div class="p-2 border-t flex">
-                <input type="text" id="chatbot-input" class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask a question...">
-                <button id="chatbot-send-btn" class="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 flex items-center justify-center font-bold text-2xl">&rarr;</button>
+            <div id="modal-content-container" class="mt-5 space-y-4">
+                <!-- Details will be populated here by JavaScript -->
             </div>
         </div>
-        <button id="chatbot-toggle-btn" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto">
-            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-        </button>
-    </div> -->
+    </div>
 
-        <!-- FINAL FIX: Disable clicks on the container but re-enable them on the children -->
-   <div id="chatbot-container" class="fixed bottom-5 right-2 z-40 pointer-events-none"> <!-- ADD pointer-events-none -->
-        
-        <!-- The chatbot window re-enables pointer events for itself -->
-        <div id="chatbot-window" class="w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right pointer-events-auto"> <!-- ADD pointer-events-auto -->
+    <!-- CHATBOT INTERFACE -->
+    <div id="chatbot-container" class="fixed bottom-5 right-2 z-40 pointer-events-none">
+        <div id="chatbot-window" class="w-80 h-96 bg-white rounded-xl shadow-2xl flex flex-col transform scale-0 origin-bottom-right pointer-events-auto">
             <div class="bg-blue-600 text-white p-3 rounded-t-xl"><h3 class="font-bold text-center">HR Help Bot</h3></div>
             <div id="chatbot-messages" class="flex-1 p-4 overflow-y-auto h-64 space-y-2"><div class="flex"><div class="text-sm p-2 bg-slate-200 rounded-lg">Hi! How can I help you today? Ask me about payroll, leave, dress code, etc.</div></div></div>
             <div class="p-2 border-t flex"><input type="text" id="chatbot-input" class="w-full px-3 py-2 border rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Ask a question..."><button id="chatbot-send-btn" class="bg-blue-600 text-white px-4 rounded-r-md hover:bg-blue-700 flex items-center justify-center font-bold text-2xl">&rarr;</button></div>
         </div>
-
-        <!-- The toggle button also re-enables pointer events for itself -->
-        <button id="chatbot-toggle-btn" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto pointer-events-auto"> <!-- ADD pointer-events-auto -->
+        <button id="chatbot-toggle-btn" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-xl mt-4 ml-auto pointer-events-auto">
             <svg class="w-8 h-8 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
         </button>
     </div>
@@ -175,6 +164,7 @@
         const passwordModal = document.getElementById('password-modal');
         let currentUser = null;
         let chatbotContext = {};
+        let allTicketsData = []; // NEW: To store the full data of all tickets
 
         function showView(viewName) { if (viewName === 'create') { viewTicketsView.style.display = 'none'; createTicketView.style.display = 'block'; } else { createTicketView.style.display = 'none'; viewTicketsView.style.display = 'block'; } }
         function getStatusBadge(status) { const base = 'text-xs font-semibold mr-2 px-2.5 py-0.5 rounded-full'; switch (status) { case 'Open': return `<span class="bg-blue-100 text-blue-800 ${base}">Open</span>`; case 'Assigned': return `<span class="bg-yellow-100 text-yellow-800 ${base}">Assigned</span>`; case 'In Progress': return `<span class="bg-purple-100 text-purple-800 ${base}">In Progress</span>`; case 'Closed': return `<span class="bg-green-100 text-green-800 ${base}">Closed</span>`; default: return `<span class="bg-gray-100 text-gray-800 ${base}">${status}</span>`; } }
@@ -198,10 +188,11 @@
         }
 
         function displayTickets(tickets) {
+            allTicketsData = tickets; // MODIFIED: Store full ticket data globally
             const container = document.getElementById('tickets-container');
             if (tickets.length === 0) { container.innerHTML = `<p class="col-span-full text-center text-slate-500 font-semibold py-10">You haven't created any tickets yet.</p>`; return; }
             container.innerHTML = tickets.map(ticket => `
-                <div class="ticket-card bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500" data-status="${ticket.Status}">
+                <div class="ticket-card bg-white rounded-lg shadow-md p-5 border-l-4 border-blue-500 cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all" data-status="${ticket.Status}" data-ticket-id="${ticket.TicketID}">
                     <div class="flex justify-between items-start"><p class="font-bold text-lg text-slate-800">${ticket.Issue}</p>${getStatusBadge(ticket.Status)}</div>
                     <p class="text-sm text-slate-400 font-medium mb-3">${ticket.TicketID}</p>
                     <p class="text-slate-600 text-sm mb-4">${ticket.Description.substring(0, 100)}${ticket.Description.length > 100 ? '...' : ''}</p>
@@ -210,104 +201,59 @@
         }
         
         // --- CHATBOT FUNCTIONS ---
-                function appendMessage(message, sender, buttons, summary) {
+        function appendMessage(message, sender, buttons, summary) {
             const messagesContainer = document.getElementById('chatbot-messages');
             const wrapper = document.createElement('div');
             const messageDiv = document.createElement('div');
-
-            // Add the main text message
             messageDiv.innerHTML = message;
-            
-            // If there's a summary, add it
             if (summary) {
                 const summaryDiv = document.createElement('div');
                 summaryDiv.className = 'mt-2 p-2 border-t border-slate-300 text-xs';
                 summaryDiv.innerHTML = summary;
                 messageDiv.appendChild(summaryDiv);
             }
-
             wrapper.className = 'flex';
             if (sender === 'user') {
                 wrapper.classList.add('justify-end');
                 messageDiv.className = 'text-sm p-2 bg-blue-500 text-white rounded-lg';
             } else {
-                messageDiv.className = 'text-sm p-2 bg-slate-200 rounded-lg w-full'; // Make bot messages full width
+                messageDiv.className = 'text-sm p-2 bg-slate-200 rounded-lg w-full';
             }
-            
             wrapper.appendChild(messageDiv);
-
-            // --- NEW: RENDER BUTTONS ---
             if (buttons && buttons.length > 0) {
                 const buttonsContainer = document.createElement('div');
                 buttonsContainer.className = 'mt-2 flex flex-col items-start gap-2';
                 buttons.forEach(btn => {
                     const buttonEl = document.createElement('button');
                     buttonEl.textContent = btn.text;
-                    buttonEl.dataset.payload = btn.payload; // Store payload in data attribute
+                    buttonEl.dataset.payload = btn.payload;
                     buttonEl.className = 'chatbot-button text-sm bg-white border border-blue-500 text-blue-600 font-semibold py-1 px-3 rounded-lg hover:bg-blue-50';
                     buttonsContainer.appendChild(buttonEl);
                 });
                 messageDiv.appendChild(buttonsContainer);
             }
-            // --- END OF NEW LOGIC ---
-
             messagesContainer.appendChild(wrapper);
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
         }
 
-        // async function sendMessage() {
-        //     const inputEl = document.getElementById('chatbot-input');
-        //     const question = inputEl.value.trim();
-        //     if (!question) return;
-        //     appendMessage(question, 'user');
-        //     inputEl.value = '';
-        //     appendMessage("...", 'bot'); // Typing indicator
-        //     try {
-        //         const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'getChatbotAnswer', question }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
-        //         const result = await res.json();
-        //         document.getElementById('chatbot-messages').lastChild.remove(); // Remove typing indicator
-        //         if (result.status === 'success') { appendMessage(result.answer, 'bot'); } else { appendMessage("Sorry, an error occurred.", 'bot'); }
-        //     } catch (error) { document.getElementById('chatbot-messages').lastChild.remove(); appendMessage("Sorry, couldn't connect to server.", 'bot'); }
-        // }
-
-                 // This replaces the old sendMessage function
         async function sendMessage(userInput) {
             const inputEl = document.getElementById('chatbot-input');
-            if (!userInput) return; // Don't send empty messages
-
-            // If the message is from a user typing, show their message
-            // If it's from a button payload, we can choose to show it or not. Let's show it.
+            if (!userInput) return;
             const buttonClicked = userInput.startsWith('_action_');
             if (!buttonClicked) {
                  appendMessage(userInput, 'user');
             }
-            
-            inputEl.value = ''; // Clear input
-            inputEl.disabled = true; // Disable input while waiting for bot
+            inputEl.value = '';
+            inputEl.disabled = true;
             appendMessage("...", 'bot');
-
             try {
-                const payload = {
-                    action: 'getChatbotAnswer',
-                    userInput: userInput, // Use a consistent key
-                    context: chatbotContext,
-                    userId: currentUser.userId,
-                    userName: currentUser.fullName
-                };
-
-                const res = await fetch(WEB_APP_URL, { 
-                    method: 'POST', 
-                    body: JSON.stringify(payload).replace("userInput", "question"), // Fix for backend expecting "question"
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
-                });
+                const payload = { action: 'getChatbotAnswer', userInput: userInput, context: chatbotContext, userId: currentUser.userId, userName: currentUser.fullName };
+                const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload).replace("userInput", "question"), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                 const result = await res.json();
-                
                 document.getElementById('chatbot-messages').lastChild.remove();
-                
                 if (result.status === 'success') {
                     appendMessage(result.answer, 'bot', result.buttons, result.summary);
                     chatbotContext = result.context || {};
-                    // Only re-enable the input if there are no buttons to guide the user
                     if (!result.buttons || result.buttons.length === 0) {
                         inputEl.disabled = false;
                         inputEl.focus();
@@ -318,7 +264,6 @@
                     inputEl.disabled = false;
                 }
             } catch (error) {
-                // Handle errors...
                 document.getElementById('chatbot-messages').lastChild.remove();
                 appendMessage("Connection error.", 'bot');
                 chatbotContext = {};
@@ -326,8 +271,8 @@
             }
         }
         
-                function setupEventListeners() {
-            // --- TICKET VIEW & FORM LISTENERS (Original) ---
+        function setupEventListeners() {
+            // --- TICKET VIEW & FORM LISTENERS ---
             document.getElementById('logout-btn').addEventListener('click', () => { 
                 sessionStorage.removeItem('loggedInUser'); 
                 window.location.href = 'index.html'; 
@@ -339,31 +284,15 @@
                 const btn = document.getElementById('submitButton');
                 btn.disabled = true; 
                 btn.textContent = 'Submitting...';
-                const data = { 
-                    issue: issue.value, 
-                    type: type.value, 
-                    description: description.value, 
-                    isConfidential: confidential.checked, 
-                    createdBy: currentUser.userId, 
-                    createdByName: currentUser.fullName 
-                };
+                const data = { issue: issue.value, type: type.value, description: description.value, isConfidential: confidential.checked, createdBy: currentUser.userId, createdByName: currentUser.fullName };
                 try {
-                    const res = await fetch(WEB_APP_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'createTicket', ticketData: data }), 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
-                    });
+                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'createTicket', ticketData: data }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                     if ((await res.json()).status === 'success') { 
                         document.getElementById('newTicketForm').reset(); 
                         fetchTickets(currentUser.userId); 
                         showView('list'); 
                     }
-                } catch(e) { 
-                    alert('Connection error.'); 
-                } finally { 
-                    btn.disabled = false; 
-                    btn.textContent = 'Submit Ticket'; 
-                }
+                } catch(e) { alert('Connection error.'); } finally { btn.disabled = false; btn.textContent = 'Submit Ticket'; }
             });
             document.getElementById('filter-container').addEventListener('click', (e) => { 
                 if (e.target.classList.contains('filter-btn')) { 
@@ -374,7 +303,7 @@
                 } 
             });
             
-            // --- PASSWORD MODAL LISTENERS (Original) ---
+            // --- PASSWORD MODAL LISTENERS ---
             document.getElementById('change-password-btn').addEventListener('click', () => passwordModal.classList.remove('hidden'));
             document.getElementById('close-pw-modal-btn').addEventListener('click', () => { 
                 passwordModal.classList.add('hidden'); 
@@ -385,68 +314,72 @@
                 e.preventDefault();
                 const msgEl = document.getElementById('pw-form-message'), btn = document.getElementById('pw-submit-btn');
                 const [oldPw, newPw, confPw] = [document.getElementById('old-password').value, document.getElementById('new-password').value, document.getElementById('confirm-password').value];
-                if (newPw !== confPw) { 
-                    msgEl.textContent = 'New passwords do not match.'; 
-                    msgEl.className = 'text-red-600'; 
-                    return; 
-                }
-                btn.disabled = true; 
-                btn.textContent = 'Updating...';
+                if (newPw !== confPw) { msgEl.textContent = 'New passwords do not match.'; msgEl.className = 'text-red-600'; return; }
+                btn.disabled = true; btn.textContent = 'Updating...';
                 try {
-                    const res = await fetch(WEB_APP_URL, { 
-                        method: 'POST', 
-                        body: JSON.stringify({ action: 'changePassword', data: { userId: currentUser.userId, oldPassword: oldPw, newPassword: newPw } }), 
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' } 
-                    });
+                    const res = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify({ action: 'changePassword', data: { userId: currentUser.userId, oldPassword: oldPw, newPassword: newPw } }), headers: { 'Content-Type': 'text/plain;charset=utf-8' } });
                     const result = await res.json();
                     msgEl.textContent = result.message;
                     msgEl.className = result.status === 'success' ? 'text-green-600' : 'text-red-600';
                     if(result.status === 'success') setTimeout(() => document.getElementById('close-pw-modal-btn').click(), 2000);
-                } catch(e) { 
-                    msgEl.textContent = 'Connection error.'; 
-                    msgEl.className = 'text-red-600'; 
+                } catch(e) { msgEl.textContent = 'Connection error.'; msgEl.className = 'text-red-600'; }
+                finally { btn.disabled = false; btn.textContent = 'Update Password'; }
+            });
+
+            // --- NEW: TICKET DETAIL MODAL LISTENERS ---
+            const ticketDetailModal = document.getElementById('ticket-detail-modal');
+            document.getElementById('tickets-container').addEventListener('click', (e) => {
+                const card = e.target.closest('.ticket-card');
+                if (!card) return;
+
+                const ticketId = card.dataset.ticketId;
+                const ticketData = allTicketsData.find(t => t.TicketID === ticketId);
+
+                if (ticketData) {
+                    const modalContent = document.getElementById('modal-content-container');
+                    modalContent.innerHTML = `
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <div><p class="text-sm font-semibold text-slate-500">Ticket ID</p><p class="font-medium text-slate-800">${ticketData.TicketID}</p></div>
+                            <div><p class="text-sm font-semibold text-slate-500">Status</p><p>${getStatusBadge(ticketData.Status)}</p></div>
+                            <div class="md:col-span-2"><p class="text-sm font-semibold text-slate-500">Primary Issue</p><p class="font-medium text-slate-800">${ticketData.Issue}</p></div>
+                            <div class="md:col-span-2"><p class="text-sm font-semibold text-slate-500">Full Description</p><p class="text-slate-600 text-sm whitespace-pre-wrap bg-slate-50 p-3 rounded-md">${ticketData.Description}</p></div>
+                            <div><p class="text-sm font-semibold text-slate-500">Created On</p><p class="font-medium text-slate-800">${ticketData.CreationDate}</p></div>
+                            <div><p class="text-sm font-semibold text-slate-500">Assigned To</p><p class="font-medium text-slate-800">${ticketData.AssignedTo || 'Not Assigned'}</p></div>
+                            <div><p class="text-sm font-semibold text-slate-500">Request Type</p><p class="font-medium text-slate-800">${ticketData.Type || 'N/A'}</p></div>
+                            <div><p class="text-sm font-semibold text-slate-500">Confidential</p><p class="font-medium text-slate-800">${ticketData.IsConfidential ? 'Yes' : 'No'}</p></div>
+                        </div>`;
+                    ticketDetailModal.classList.remove('hidden');
                 }
-                finally { 
-                    btn.disabled = false; 
-                    btn.textContent = 'Update Password'; 
+            });
+
+            document.getElementById('close-ticket-modal-btn').addEventListener('click', () => {
+                ticketDetailModal.classList.add('hidden');
+            });
+
+            ticketDetailModal.addEventListener('click', (e) => {
+                if (e.target.id === 'ticket-detail-modal') {
+                     ticketDetailModal.classList.add('hidden');
                 }
             });
             
-            // --- NEXT-GEN CHATBOT LISTENERS (New & Updated) ---
+            // --- CHATBOT LISTENERS ---
             let isChatStarted = false;
             document.getElementById('chatbot-toggle-btn').addEventListener('click', () => {
                 const chatbotWindow = document.getElementById('chatbot-window');
                 chatbotWindow.classList.toggle('scale-0');
-
-                // If the bot is being opened for the first time, send the welcome message
                 if (!isChatStarted && !chatbotWindow.classList.contains('scale-0')) {
                     isChatStarted = true;
-                    sendMessage('_action_start'); // Trigger the welcome flow
+                    sendMessage('_action_start');
                 }
             });
-
-            // Send message from the text input on button click or Enter key
             document.getElementById('chatbot-send-btn').addEventListener('click', () => sendMessage(document.getElementById('chatbot-input').value.trim()));
-            document.getElementById('chatbot-input').addEventListener('keyup', (e) => {
-                if (e.key === 'Enter') {
-                    sendMessage(document.getElementById('chatbot-input').value.trim());
-                }
-            });
-
-            // Master event listener for all chatbot button clicks (using event delegation)
+            document.getElementById('chatbot-input').addEventListener('keyup', (e) => { if (e.key === 'Enter') { sendMessage(document.getElementById('chatbot-input').value.trim()); } });
             document.getElementById('chatbot-messages').addEventListener('click', function(e) {
-                // We only care about clicks on elements with the 'chatbot-button' class
                 if (e.target.classList.contains('chatbot-button')) {
                     const payload = e.target.dataset.payload;
                     const buttonText = e.target.textContent;
-                    
-                    // 1. Show the user's choice in the chat history
                     appendMessage(buttonText, 'user');
-                    
-                    // 2. Send the internal payload to the server for the next step
                     sendMessage(payload);
-                    
-                    // 3. Disable all buttons in the same group to prevent re-clicks
                     const buttonGroup = e.target.parentElement.querySelectorAll('.chatbot-button');
                     buttonGroup.forEach(btn => {
                         btn.disabled = true;
@@ -460,15 +393,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
