@@ -1,3 +1,5 @@
+<!-- v2.7 -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -42,7 +44,6 @@
         </div>
     </main>
 
-    <!-- Details Modal -->
     <div id="ticket-modal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-30">
         <div class="relative top-20 mx-auto p-5 border w-full max-w-2xl shadow-lg rounded-md bg-white">
             <div class="flex justify-between items-center border-b pb-3">
@@ -61,7 +62,7 @@
             
             <hr class="my-5">
             
-            <div id="modal-locked-message" class="hidden text-center font-semibold text-red-700 bg-red-100 p-3 rounded-md mb-4">This ticket has been assigned and is locked.</div>
+            <div id="modal-locked-message" class="hidden text-center font-semibold text-red-700 bg-red-100 p-3 rounded-md mb-4">This ticket is Closed and cannot be modified.</div>
 
             <form id="update-ticket-form">
                 <input type="hidden" id="form-ticket-id">
@@ -179,7 +180,11 @@
 
             assignSelect.value = ticket.AssignedTo || '';
 
-            const isLocked = ticket.IsReassignable === false;
+            // --- KEY CHANGE HERE ---
+            // Old logic: const isLocked = ticket.IsReassignable === false;
+            // New logic: Only lock if status is specifically "Closed"
+            const isLocked = ticket.Status === 'Closed';
+            
             document.getElementById('form-status').disabled = isLocked;
             assignSelect.disabled = isLocked;
             document.getElementById('form-submit-btn').disabled = isLocked;
